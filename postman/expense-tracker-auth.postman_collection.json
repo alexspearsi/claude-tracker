@@ -1,0 +1,884 @@
+{
+  "info": {
+    "name": "Expense Tracker — API",
+    "description": "Запросы к apps/api: авторизация, категории и транзакции (доходы/расходы).\n\nAccess/refresh токены сохраняются автоматически в переменные коллекции после register/login/refresh — остальные запросы берут их оттуда. Порядок для Collection Runner: Auth → Register (или Login), затем Categories → Create, затем папка Transactions.\n\nОшибки валидации: роуты auth проверяются Zod и отдают `error.issues`; категории и транзакции проверяются class-validator и отдают ошибки, сгруппированные по полям: `error.message = { поле: [сообщения] }`.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:4001/api" },
+    { "key": "email", "value": "test@example.com" },
+    { "key": "password", "value": "password1" },
+    { "key": "name", "value": "Тест" },
+    { "key": "accessToken", "value": "" },
+    { "key": "refreshToken", "value": "" },
+    { "key": "categoryId", "value": "" },
+    { "key": "transactionId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\",\n  \"name\": \"{{name}}\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  const body = pm.response.json();",
+                  "  pm.collectionVariables.set('accessToken', body.accessToken);",
+                  "  pm.collectionVariables.set('refreshToken', body.refreshToken);",
+                  "}",
+                  "pm.test('201 или 409 (email уже занят)', () => {",
+                  "  pm.expect([201, 409]).to.include(pm.response.code);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.collectionVariables.set('accessToken', body.accessToken);",
+                  "pm.collectionVariables.set('refreshToken', body.refreshToken);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Me (GET /auth/me)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+            },
+            "url": { "raw": "{{baseUrl}}/auth/me", "host": ["{{baseUrl}}"], "path": ["auth", "me"] }
+          }
+        },
+        {
+          "name": "Me (GET /users/me)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+            },
+            "url": { "raw": "{{baseUrl}}/users/me", "host": ["{{baseUrl}}"], "path": ["users", "me"] }
+          }
+        },
+        {
+          "name": "Refresh",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/refresh", "host": ["{{baseUrl}}"], "path": ["auth", "refresh"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.collectionVariables.set('accessToken', body.accessToken);",
+                  "pm.collectionVariables.set('refreshToken', body.refreshToken);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/logout", "host": ["{{baseUrl}}"], "path": ["auth", "logout"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('204 No Content', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Categories",
+      "description": "CRUD категорий текущего пользователя. Все запросы папки наследуют Bearer {{accessToken}} — сначала выполните Auth → Login. Create сохраняет id в {{categoryId}}, Update/Delete берут его оттуда.",
+      "auth": {
+        "type": "bearer",
+        "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+      },
+      "item": [
+        {
+          "name": "Create",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Еда\",\n  \"color\": \"#22c55e\",\n  \"icon\": \"utensils\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/categories", "host": ["{{baseUrl}}"], "path": ["categories"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  pm.collectionVariables.set('categoryId', pm.response.json().id);",
+                  "}",
+                  "pm.test('201 или 409 (категория с таким названием уже есть)', () => {",
+                  "  pm.expect([201, 409]).to.include(pm.response.code);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/categories", "host": ["{{baseUrl}}"], "path": ["categories"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('200 OK, массив категорий', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "  pm.expect(pm.response.json()).to.be.an('array');",
+                  "});",
+                  "// Если Create вернул 409 (категория уже была), id берём из списка",
+                  "if (!pm.collectionVariables.get('categoryId')) {",
+                  "  const food = pm.response.json().find((c) => c.name === 'Еда');",
+                  "  if (food) pm.collectionVariables.set('categoryId', food.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"color\": \"#16a34a\",\n  \"icon\": null\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/categories/{{categoryId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["categories", "{{categoryId}}"]
+            },
+            "description": "Все поля опциональны. `icon: null` сбрасывает иконку; `name: null` и `color: null` — 400 (колонки обязательные)."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('200 OK, цвет обновлён, иконка сброшена', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.color).to.eql('#16a34a');",
+                  "  pm.expect(body.icon).to.be.null;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/categories/{{categoryId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["categories", "{{categoryId}}"]
+            },
+            "description": "Внимание: если по категории есть транзакции — 409 (onDelete: Restrict). Сначала удалите/перенесите транзакции этой категории (см. папку Transactions), иначе запрос вернёт 409, а не 204."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('204 (удалена) или 409 (есть транзакции)', () => {",
+                  "  pm.expect([204, 409]).to.include(pm.response.code);",
+                  "});",
+                  "if (pm.response.code === 204) {",
+                  "  pm.collectionVariables.set('categoryId', '');",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Ошибки",
+          "description": "Негативные сценарии: формат ошибок class-validator, проверка UUID и авторизации.",
+          "item": [
+            {
+              "name": "Create — невалидный цвет (400)",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Транспорт\",\n  \"color\": \"red\"\n}"
+                },
+                "url": { "raw": "{{baseUrl}}/categories", "host": ["{{baseUrl}}"], "path": ["categories"] }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('400, ошибка сгруппирована по полю color', () => {",
+                      "  pm.response.to.have.status(400);",
+                      "  pm.expect(pm.response.json().error.message).to.have.property('color');",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Create — лишнее поле (400)",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Транспорт\",\n  \"userId\": \"00000000-0000-0000-0000-000000000000\"\n}"
+                },
+                "url": { "raw": "{{baseUrl}}/categories", "host": ["{{baseUrl}}"], "path": ["categories"] }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('400, поле userId запрещено (forbidNonWhitelisted)', () => {",
+                      "  pm.response.to.have.status(400);",
+                      "  pm.expect(pm.response.json().error.message).to.have.property('userId');",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Update — id не UUID (400)",
+              "request": {
+                "method": "PATCH",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Транспорт\"\n}"
+                },
+                "url": { "raw": "{{baseUrl}}/categories/abc", "host": ["{{baseUrl}}"], "path": ["categories", "abc"] }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('400 Bad Request', () => pm.response.to.have.status(400));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "List — без токена (401)",
+              "request": {
+                "auth": { "type": "noauth" },
+                "method": "GET",
+                "header": [],
+                "url": { "raw": "{{baseUrl}}/categories", "host": ["{{baseUrl}}"], "path": ["categories"] }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('401 Unauthorized', () => pm.response.to.have.status(401));"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Transactions",
+      "description": "CRUD доходов/расходов текущего пользователя + сводка за месяц. Все запросы папки наследуют Bearer {{accessToken}} — сначала выполните Auth → Login и Categories → Create (нужен {{categoryId}}). Create сохраняет id в {{transactionId}}, Get one / Update / Delete берут его оттуда.\n\namount ходит строкой вида \"1234.56\" (до 10 цифр, не более 2 знаков после точки) — это единственный способ не потерять точность Decimal(12,2); JSON-число тоже принимается и приводится к строке на лету. type — INCOME или EXPENSE. date — ISO 8601.",
+      "auth": {
+        "type": "bearer",
+        "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+      },
+      "item": [
+        {
+          "name": "Create — расход (amount строкой)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": \"1234.56\",\n  \"type\": \"EXPENSE\",\n  \"categoryId\": \"{{categoryId}}\",\n  \"date\": \"2026-09-13T10:00:00.000Z\",\n  \"description\": \"Обед\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/transactions", "host": ["{{baseUrl}}"], "path": ["transactions"] },
+            "description": "Требует {{categoryId}} — выполните Categories → Create/List перед этим запросом."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('201 Created, amount строкой \"1234.56\"', () => {",
+                  "  pm.response.to.have.status(201);",
+                  "  pm.expect(pm.response.json().amount).to.eql('1234.56');",
+                  "});",
+                  "pm.collectionVariables.set('transactionId', pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create — доход (amount числом)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 50000,\n  \"type\": \"INCOME\",\n  \"categoryId\": \"{{categoryId}}\",\n  \"date\": \"2026-09-10T08:00:00.000Z\",\n  \"description\": \"Зарплата\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/transactions", "host": ["{{baseUrl}}"], "path": ["transactions"] },
+            "description": "Число тоже допустимо — сервер приводит его к строке \"50000.00\" перед сохранением."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('201 Created, amount приведён к строке \"50000.00\"', () => {",
+                  "  pm.response.to.have.status(201);",
+                  "  pm.expect(pm.response.json().amount).to.eql('50000.00');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/transactions", "host": ["{{baseUrl}}"], "path": ["transactions"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('200 OK, массив, отсортирован по date убыв.', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "  const items = pm.response.json();",
+                  "  pm.expect(items).to.be.an('array');",
+                  "  for (let i = 1; i < items.length; i++) {",
+                  "    pm.expect(new Date(items[i - 1].date) >= new Date(items[i].date)).to.be.true;",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List — фильтры (type, dateFrom, dateTo, categoryId)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/transactions?type=EXPENSE&dateFrom=2026-09-01T00:00:00.000Z&dateTo=2026-09-30&categoryId={{categoryId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["transactions"],
+              "query": [
+                { "key": "type", "value": "EXPENSE" },
+                { "key": "dateFrom", "value": "2026-09-01T00:00:00.000Z" },
+                { "key": "dateTo", "value": "2026-09-30" },
+                { "key": "categoryId", "value": "{{categoryId}}" }
+              ]
+            },
+            "description": "dateTo без времени трактуется включительно — захватывает весь день 30-го числа."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('200 OK, все элементы — EXPENSE выбранной категории', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "  const items = pm.response.json();",
+                  "  items.forEach((tx) => {",
+                  "    pm.expect(tx.type).to.eql('EXPENSE');",
+                  "    pm.expect(tx.categoryId).to.eql(pm.collectionVariables.get('categoryId'));",
+                  "  });",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get one",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/transactions/{{transactionId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["transactions", "{{transactionId}}"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": \"10.00\",\n  \"description\": \"Обед (скорректировано)\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/transactions/{{transactionId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["transactions", "{{transactionId}}"]
+            },
+            "description": "Все поля опциональны. `description: null` сбрасывает описание; `amount: null`/`type: null`/`categoryId: null`/`date: null` — 400 (колонки обязательные)."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('200 OK, сумма и описание обновлены', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.amount).to.eql('10.00');",
+                  "  pm.expect(body.description).to.eql('Обед (скорректировано)');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Summary (GET /transactions/summary)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/transactions/summary?month=9&year=2026",
+              "host": ["{{baseUrl}}"],
+              "path": ["transactions", "summary"],
+              "query": [
+                { "key": "month", "value": "9" },
+                { "key": "year", "value": "2026" }
+              ]
+            },
+            "description": "month и year — обязательные query-параметры (1–12 и разумный диапазон лет). Ответ: income/expense/balance строками + разбивка byCategory."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('200 OK, income/expense/balance строками', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body).to.include.all.keys('income', 'expense', 'balance', 'byCategory', 'from', 'to');",
+                  "  pm.expect(body.income).to.be.a('string');",
+                  "  pm.expect(body.byCategory).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/transactions/{{transactionId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["transactions", "{{transactionId}}"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('204 No Content', () => pm.response.to.have.status(204));",
+                  "pm.collectionVariables.set('transactionId', '');"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Ошибки",
+          "description": "Негативные сценарии: формат сумм, енам типа, дата, UUID категории, изоляция по пользователю, обязательность month/year.",
+          "item": [
+            {
+              "name": "Create — сумма с 3 знаками после точки (400)",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"amount\": \"12.345\",\n  \"type\": \"EXPENSE\",\n  \"categoryId\": \"{{categoryId}}\",\n  \"date\": \"2026-09-13T10:00:00.000Z\"\n}"
+                },
+                "url": { "raw": "{{baseUrl}}/transactions", "host": ["{{baseUrl}}"], "path": ["transactions"] }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('400, ошибка по полю amount', () => {",
+                      "  pm.response.to.have.status(400);",
+                      "  pm.expect(pm.response.json().error.message).to.have.property('amount');",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Create — нулевая сумма (400)",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"amount\": \"0\",\n  \"type\": \"EXPENSE\",\n  \"categoryId\": \"{{categoryId}}\",\n  \"date\": \"2026-09-13T10:00:00.000Z\"\n}"
+                },
+                "url": { "raw": "{{baseUrl}}/transactions", "host": ["{{baseUrl}}"], "path": ["transactions"] }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('400 Bad Request', () => pm.response.to.have.status(400));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Create — недопустимый type (400)",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"amount\": \"10\",\n  \"type\": \"TRANSFER\",\n  \"categoryId\": \"{{categoryId}}\",\n  \"date\": \"2026-09-13T10:00:00.000Z\"\n}"
+                },
+                "url": { "raw": "{{baseUrl}}/transactions", "host": ["{{baseUrl}}"], "path": ["transactions"] }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('400, ошибка по полю type', () => {",
+                      "  pm.response.to.have.status(400);",
+                      "  pm.expect(pm.response.json().error.message).to.have.property('type');",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Create — несуществующая дата 31 февраля (400)",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"amount\": \"10\",\n  \"type\": \"EXPENSE\",\n  \"categoryId\": \"{{categoryId}}\",\n  \"date\": \"2026-02-31T10:00:00.000Z\"\n}"
+                },
+                "url": { "raw": "{{baseUrl}}/transactions", "host": ["{{baseUrl}}"], "path": ["transactions"] }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('400 Bad Request', () => pm.response.to.have.status(400));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Create — categoryId не UUID (400)",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"amount\": \"10\",\n  \"type\": \"EXPENSE\",\n  \"categoryId\": \"not-a-uuid\",\n  \"date\": \"2026-09-13T10:00:00.000Z\"\n}"
+                },
+                "url": { "raw": "{{baseUrl}}/transactions", "host": ["{{baseUrl}}"], "path": ["transactions"] }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('400 Bad Request', () => pm.response.to.have.status(400));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Create — чужая/несуществующая категория (404)",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"amount\": \"10\",\n  \"type\": \"EXPENSE\",\n  \"categoryId\": \"00000000-0000-0000-0000-000000000000\",\n  \"date\": \"2026-09-13T10:00:00.000Z\"\n}"
+                },
+                "url": { "raw": "{{baseUrl}}/transactions", "host": ["{{baseUrl}}"], "path": ["transactions"] }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('404 Not Found', () => pm.response.to.have.status(404));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Update — amount: null (400)",
+              "request": {
+                "method": "PATCH",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"amount\": null\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/transactions/{{transactionId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["transactions", "{{transactionId}}"]
+                },
+                "description": "amount — NOT NULL колонка: @ValidateIf(isPresent) пропускает null дальше в @IsString и валит на 400, а не сбрасывает поле."
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('400 Bad Request', () => pm.response.to.have.status(400));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "List — лишний query-параметр (400)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/transactions?limit=10",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["transactions"],
+                  "query": [{ "key": "limit", "value": "10" }]
+                },
+                "description": "Пагинации у транзакций нет — forbidNonWhitelisted отсекает незадекларированные query-параметры."
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('400 Bad Request', () => pm.response.to.have.status(400));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Get one — id не UUID (400)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": { "raw": "{{baseUrl}}/transactions/not-a-uuid", "host": ["{{baseUrl}}"], "path": ["transactions", "not-a-uuid"] }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('400 Bad Request', () => pm.response.to.have.status(400));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Summary — без month/year (400)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": { "raw": "{{baseUrl}}/transactions/summary", "host": ["{{baseUrl}}"], "path": ["transactions", "summary"] },
+                "description": "month и year обязательны — без @IsOptional пустой запрос падает в 400."
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('400 Bad Request', () => pm.response.to.have.status(400));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Summary — month вне диапазона (400)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/transactions/summary?month=13&year=2026",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["transactions", "summary"],
+                  "query": [
+                    { "key": "month", "value": "13" },
+                    { "key": "year", "value": "2026" }
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('400 Bad Request', () => pm.response.to.have.status(400));"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "List — без токена (401)",
+              "request": {
+                "auth": { "type": "noauth" },
+                "method": "GET",
+                "header": [],
+                "url": { "raw": "{{baseUrl}}/transactions", "host": ["{{baseUrl}}"], "path": ["transactions"] }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('401 Unauthorized', () => pm.response.to.have.status(401));"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

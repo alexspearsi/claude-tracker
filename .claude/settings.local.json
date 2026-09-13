@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git init:*)",
+      "PowerShell($p = Get-CimInstance Win32_Process -Filter \"ProcessId = 30284\"; $p | Select-Object ProcessId, ParentProcessId, CommandLine | Format-List; $pp = Get-CimInstance Win32_Process -Filter \"ProcessId = $\\($p.ParentProcessId\\)\"; \"--- parent ---\"; $pp | Select-Object ProcessId, CommandLine | Format-List)",
+      "PowerShell(try { \\(Invoke-WebRequest -Uri http://localhost:4001/api/health -UseBasicParsing -TimeoutSec 5\\).Content } catch { \"ERR: $\\($_.Exception.Message\\)\" })",
+      "PowerShell(node \"C:\\\\Users\\\\User\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-User-OneDrive-Desktop-purple-school-claude\\\\14a34d89-776b-4ebd-ae97-d8a0bbfe956f\\\\scratchpad\\\\e2e-categories.mjs\")",
+      "PowerShell(node -e \"const c=require\\(process.argv[1]\\); const walk=\\(items,d=0\\)=>items.forEach\\(i=>{console.log\\('  '.repeat\\(d\\)+\\(i.item?'[папка] ':''\\)+i.name\\); if\\(i.item\\) walk\\(i.item,d+1\\);}\\); walk\\(c.item\\); console.log\\('vars:', c.variable.map\\(v=>v.key\\).join\\(', '\\)\\)\" \"C:\\\\Users\\\\User\\\\OneDrive\\\\Desktop\\\\purple school claude\\\\postman\\\\expense-tracker-auth.postman_collection.json\")",
+      "PowerShell(Test-Path *)",
+      "PowerShell(try { \\(Invoke-WebRequest -Uri http://localhost:4001/api/health -UseBasicParsing -TimeoutSec 5\\).Content } catch { \"api down: $\\($_.Exception.Message\\)\" })"
+    ]
+  }
+}

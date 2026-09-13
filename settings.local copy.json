@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git init:*)"
+    ]
+  },
+  "hooks": {
+    "Notification": [
+      {
+        "hooks": [{ "type": "command", "command": "powershell.exe -NoProfile -Command \"(New-Object Media.SoundPlayer 'C:\\Windows\\Media\\notify.wav').PlaySync()\"" }]
+      }
+    ]
+  }
+}
