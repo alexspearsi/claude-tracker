@@ -5,11 +5,13 @@ import { TransactionType } from '../../generated/prisma/enums.js';
 import { PRISMA, type Prisma } from '../../prisma/prisma.provider.js';
 import { isPrismaError, PrismaErrorCode } from '../../prisma/prisma-errors.js';
 import type { CreateTransactionDto } from './dto/create-transaction.dto.js';
+import { LIMIT_DEFAULT } from './dto/transaction-validation.js';
 import type { TransactionQueryDto } from './dto/transaction-query.dto.js';
 import type { UpdateTransactionDto } from './dto/update-transaction.dto.js';
 import type {
   SummaryCategoryItem,
   TransactionDto,
+  TransactionListDto,
   TransactionSummary,
 } from './transaction.types.js';
 
@@ -30,18 +32,29 @@ export class TransactionsService {
   constructor(@Inject(PRISMA) private readonly prisma: Prisma) {}
 
   // Все методы фильтруют по userId: транзакции одного пользователя не видны другому.
-  async findAll(userId: string, query: TransactionQueryDto): Promise<TransactionDto[]> {
-    const records = await this.prisma.transaction.findMany({
-      where: {
-        userId,
-        ...(query.type ? { type: query.type } : {}),
-        ...(query.categoryId ? { categoryId: query.categoryId } : {}),
-        ...buildDateFilter(query.dateFrom, query.dateTo),
-      },
-      // вторичный ключ сортировки: у транзакций одного дня иначе недетерминированный порядок
-      orderBy: [{ date: 'desc' }, { createdAt: 'desc' }],
-    });
-    return records.map(toTransaction);
+  async findAll(userId: string, query: TransactionQueryDto): Promise<TransactionListDto> {
+    const where = {
+      userId,
+      ...(query.type ? { type: query.type } : {}),
+      ...(query.categoryId ? { categoryId: query.categoryId } : {}),
+      ...buildDateFilter(query.dateFrom, query.dateTo),
+    };
+
+    // where переиспользуется в обоих запросах: total должен считаться по тем же
+    // фильтрам, что и сама страница, иначе при активном фильтре число будет неверным.
+    const [records, total] = await Promise.all([
+      this.prisma.transaction.findMany({
+        where,
+        // вторичный ключ сортировки: без него skip/take даёт дубли и пропуски между
+        // страницами, если у нескольких транзакций одна и та же date
+        orderBy: [{ date: 'desc' }, { createdAt: 'desc' }],
+        take: query.limit ?? LIMIT_DEFAULT,
+        skip: query.offset ?? 0,
+      }),
+      this.prisma.transaction.count({ where }),
+    ]);
+
+    return { items: records.map(toTransaction), total };
   }
 
   async findOne(userId: string, id: string): Promise<TransactionDto> {

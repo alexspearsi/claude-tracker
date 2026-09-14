@@ -10,6 +10,12 @@ export interface TransactionDto {
   createdAt: string; // ISO
 }
 
+/** Список с пагинацией: total — количество по тем же фильтрам, без limit/offset. */
+export interface TransactionListDto {
+  items: TransactionDto[];
+  total: number;
+}
+
 export interface SummaryCategoryItem {
   categoryId: string;
   name: string;

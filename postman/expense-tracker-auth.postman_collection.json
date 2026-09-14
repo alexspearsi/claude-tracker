@@ -442,10 +442,12 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test('200 OK, массив, отсортирован по date убыв.', () => {",
+                  "pm.test('200 OK, { items, total }, отсортирован по date убыв.', () => {",
                   "  pm.response.to.have.status(200);",
-                  "  const items = pm.response.json();",
-                  "  pm.expect(items).to.be.an('array');",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.items).to.be.an('array');",
+                  "  pm.expect(body.total).to.be.a('number');",
+                  "  const items = body.items;",
                   "  for (let i = 1; i < items.length; i++) {",
                   "    pm.expect(new Date(items[i - 1].date) >= new Date(items[i].date)).to.be.true;",
                   "  }",
@@ -480,11 +482,68 @@
                 "exec": [
                   "pm.test('200 OK, все элементы — EXPENSE выбранной категории', () => {",
                   "  pm.response.to.have.status(200);",
-                  "  const items = pm.response.json();",
+                  "  const items = pm.response.json().items;",
                   "  items.forEach((tx) => {",
                   "    pm.expect(tx.type).to.eql('EXPENSE');",
                   "    pm.expect(tx.categoryId).to.eql(pm.collectionVariables.get('categoryId'));",
                   "  });",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List — пагинация (limit/offset)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/transactions?limit=10&offset=0",
+              "host": ["{{baseUrl}}"],
+              "path": ["transactions"],
+              "query": [
+                { "key": "limit", "value": "10" },
+                { "key": "offset", "value": "0" }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('200 OK, не больше limit элементов, total задан', () => {",
+                  "  pm.response.to.have.status(200);",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.items.length).to.be.at.most(10);",
+                  "  pm.expect(body.total).to.be.at.least(body.items.length);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List — limit=0 (400)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/transactions?limit=0",
+              "host": ["{{baseUrl}}"],
+              "path": ["transactions"],
+              "query": [{ "key": "limit", "value": "0" }]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('400, limit — от 1 до 100', () => {",
+                  "  pm.response.to.have.status(400);",
+                  "  pm.expect(pm.response.json().error.message).to.have.property('limit');",
                   "});"
                 ]
               }
