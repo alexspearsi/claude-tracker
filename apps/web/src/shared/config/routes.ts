@@ -3,6 +3,7 @@ export const ROUTES = {
   home: '/',
   login: '/login',
   register: '/register',
+  dashboard: '/dashboard',
   expenses: '/expenses',
   categories: '/categories',
   terms: '/terms',
@@ -10,7 +11,7 @@ export const ROUTES = {
 } as const;
 
 /** Роуты, доступные только с сессией. */
-export const PROTECTED_ROUTES = [ROUTES.expenses, ROUTES.categories];
+export const PROTECTED_ROUTES = [ROUTES.dashboard, ROUTES.expenses, ROUTES.categories];
 
-/** Роуты авторизации: залогиненного пользователя с них уводим на список трат. */
+/** Роуты авторизации: залогиненного пользователя с них уводим на главный экран. */
 export const GUEST_ROUTES = [ROUTES.login, ROUTES.register];
