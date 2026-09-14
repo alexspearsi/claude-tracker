@@ -15,8 +15,8 @@ export default function HomePage() {
         <Link href={ROUTES.register} className="underline">
           Регистрация
         </Link>
-        <Link href={ROUTES.expenses} className="underline">
-          Расходы
+        <Link href={ROUTES.dashboard} className="underline">
+          Кабинет
         </Link>
       </div>
     </main>
