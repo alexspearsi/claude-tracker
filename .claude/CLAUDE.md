@@ -141,6 +141,17 @@ RSC-запрос не обработали иначе, чем HTML. В Server Ac
 `refreshSession()` из `entities/session/api/session.ts`; в `logoutAction` оно нужно, чтобы
 отозвать refresh в базе даже при истёкшем access.
 
+**401 от api внутри RSC уводит на `/session-expired`, а не сразу на `/login`.** Такое
+бывает редко (например, ротация `JWT_ACCESS_SECRET`) — access-кука ещё не истекла по
+времени жизни, но токен уже не проходит `JwtAuthGuard`. Позвать `clearSession()` прямо в
+компоненте (`widgets/app-header`, `views/dashboard`) нельзя: `cookies().delete()` в Server
+Component при рендере бросает исключение, разрешён только в Server Action и Route Handler.
+Поэтому `app/session-expired/route.ts` — отдельный Route Handler, который физически чистит
+куки (`clearSessionCookies` из `proxy-session.ts`) и редиректит на `/login`; без этого шага
+`proxy.ts` увидел бы на `/login` ту же мёртвую access-куку и как `isGuestOnly` тут же увёл
+обратно на `/dashboard` — бесконечный цикл. Роут не входит ни в `PROTECTED_ROUTES`, ни в
+`GUEST_ROUTES`, поэтому proxy пропускает его без изменений.
+
 ## Ограничения версий стека
 
 Стек новее большинства гайдов — эти решения приняты вынужденно, не меняй их без причины:

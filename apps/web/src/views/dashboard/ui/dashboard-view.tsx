@@ -25,8 +25,10 @@ export async function DashboardView({ page }: DashboardViewProps) {
   ]);
 
   // redirect — вне try/catch: результат уже вычислен, catch тут ни при чём.
+  // На /session-expired, а не /login: там куки физически чистятся — см. комментарий
+  // в widgets/app-header/ui/app-header.tsx и app/session-expired/route.ts.
   if (result.status === 'unauthorized') {
-    redirect(ROUTES.login);
+    redirect(ROUTES.sessionExpired);
   }
 
   return (

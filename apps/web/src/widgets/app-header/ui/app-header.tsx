@@ -35,9 +35,11 @@ export async function AppHeader() {
 
   const result = await loadDisplayName(session.accessToken);
   // redirect — на верхнем уровне компонента, вне try/catch: он бросает NEXT_REDIRECT,
-  // а catch в loadDisplayName его бы проглотил.
+  // а catch в loadDisplayName его бы проглотил. На /session-expired, а не /login
+  // напрямую: там куки физически чистятся (route.ts) — иначе мёртвая access-кука
+  // осталась бы на месте, и proxy.ts тут же увёл бы с /login обратно на /dashboard.
   if (result.status === 'unauthorized') {
-    redirect(ROUTES.login);
+    redirect(ROUTES.sessionExpired);
   }
 
   return (
