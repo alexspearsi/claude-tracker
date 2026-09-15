@@ -16,32 +16,46 @@ export type LoadRecentTransactionsResult =
  * отдаёт вложенную category (маппер toTransaction в api общий на все ручки, менять
  * контракт ради дашборда не стоит), а категорий у пользователя единицы — запрос идёт
  * параллельно и почти ничего не стоит по времени.
+ *
+ * Promise.allSettled, а не Promise.all: с Promise.all любая из двух ошибок (в том
+ * числе не связанная с транзакциями — например, 500 от /categories) ловилась бы
+ * одним общим catch и подписывалась как «не удалось загрузить транзакции», хотя
+ * список транзакций мог загрузиться нормально. allSettled позволяет разобрать,
+ * какой именно запрос упал, и сформулировать точное сообщение.
  */
 export async function loadRecentTransactions(
   accessToken: string,
   page: number,
 ): Promise<LoadRecentTransactionsResult> {
-  try {
-    const [list, categories] = await Promise.all([
-      getTransactions(accessToken, { limit: PAGE_SIZE, offset: (page - 1) * PAGE_SIZE }),
-      getCategories(accessToken),
-    ]);
+  const [txResult, catResult] = await Promise.allSettled([
+    getTransactions(accessToken, { limit: PAGE_SIZE, offset: (page - 1) * PAGE_SIZE }),
+    getCategories(accessToken),
+  ]);
 
-    const categoryById = new Map(categories.map((c) => [c.id, c]));
-    const rows: TransactionRowModel[] = list.items.map((tx) => {
-      const category = categoryById.get(tx.categoryId);
-      return {
-        ...tx,
-        categoryName: category?.name ?? 'Без категории',
-        categoryColor: category?.color ?? '#94a3b8',
-      };
-    });
-
-    return { status: 'ok', rows, total: list.total };
-  } catch (error) {
-    if (error instanceof ApiError && error.status === 401) {
-      return { status: 'unauthorized' };
-    }
-    return { status: 'error', message: apiErrorMessage(error) };
+  // 401 от любого из двух запросов означает мёртвую сессию — источник не важен.
+  const isUnauthorized = [txResult, catResult].some(
+    (result) => result.status === 'rejected' && result.reason instanceof ApiError && result.reason.status === 401,
+  );
+  if (isUnauthorized) {
+    return { status: 'unauthorized' };
   }
+
+  if (txResult.status === 'rejected') {
+    return { status: 'error', message: `Транзакции: ${apiErrorMessage(txResult.reason)}` };
+  }
+  if (catResult.status === 'rejected') {
+    return { status: 'error', message: `Категории: ${apiErrorMessage(catResult.reason)}` };
+  }
+
+  const categoryById = new Map(catResult.value.map((c) => [c.id, c]));
+  const rows: TransactionRowModel[] = txResult.value.items.map((tx) => {
+    const category = categoryById.get(tx.categoryId);
+    return {
+      ...tx,
+      categoryName: category?.name ?? 'Без категории',
+      categoryColor: category?.color ?? '#94a3b8',
+    };
+  });
+
+  return { status: 'ok', rows, total: txResult.value.total };
 }

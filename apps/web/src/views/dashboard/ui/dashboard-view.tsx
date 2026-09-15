@@ -38,7 +38,7 @@ export async function DashboardView({ page }: DashboardViewProps) {
       </h1>
 
       {result.status === 'error' ? (
-        <p className="text-sm text-destructive">Не удалось загрузить транзакции: {result.message}</p>
+        <p className="text-sm text-destructive">Не удалось загрузить данные: {result.message}</p>
       ) : (
         <RecentTransactions
           rows={result.rows}
