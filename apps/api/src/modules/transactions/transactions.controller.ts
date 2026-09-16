@@ -13,7 +13,7 @@ import {
 } from '@nestjs/common';
 import { CurrentUser, type AuthUser } from '../../common/decorators/current-user.decorator.js';
 import { TransactionsService } from './transactions.service.js';
-import type { TransactionDto, TransactionSummary } from './transaction.types.js';
+import type { TransactionDto, TransactionListDto, TransactionSummary } from './transaction.types.js';
 // DTO импортируются значением, не через `import type`: глобальный ValidationPipe берёт класс
 // из метаданных параметра, а для type-only импорта там окажется Object и проверка молча пропустится.
 import { CreateTransactionDto } from './dto/create-transaction.dto.js';
@@ -30,7 +30,7 @@ export class TransactionsController {
   findAll(
     @CurrentUser() user: AuthUser,
     @Query() query: TransactionQueryDto,
-  ): Promise<TransactionDto[]> {
+  ): Promise<TransactionListDto> {
     return this.transactions.findAll(user.id, query);
   }
 

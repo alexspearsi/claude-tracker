@@ -7,6 +7,10 @@ export const AMOUNT_NOT_ZERO = /[1-9]/;
 export const DESCRIPTION_MAX = 500;
 export const YEAR_MIN = 2000;
 export const YEAR_MAX = 2100;
+/** Дефолт подставляется в сервисе через `??`, а не инициализатором поля DTO:
+ *  class-transformer пишет undefined в отсутствующие ключи и затирает инициализатор. */
+export const LIMIT_DEFAULT = 20;
+export const LIMIT_MAX = 100;
 
 export const messages = {
   amountString: 'Сумма должна быть строкой вида 1234.56',
@@ -23,6 +27,10 @@ export const messages = {
   monthRange: 'month — от 1 до 12',
   yearInt: 'year — целое число',
   yearRange: `year — от ${YEAR_MIN} до ${YEAR_MAX}`,
+  limitInt: 'limit — целое число',
+  limitRange: `limit — от 1 до ${LIMIT_MAX}`,
+  offsetInt: 'offset — целое число',
+  offsetMin: 'offset — не меньше 0',
 } as const;
 
 /** Обрезает пробелы по краям; нестроковые значения отдаёт как есть — их отсечёт @IsString. */

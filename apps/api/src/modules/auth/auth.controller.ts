@@ -1,5 +1,5 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, NotFoundException, Post } from '@nestjs/common';
-import { CommandBus, QueryBus } from '@nestjs/cqrs';
+import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import { CommandBus } from '@nestjs/cqrs';
 import {
   loginSchema,
   refreshSchema,
@@ -8,13 +8,10 @@ import {
   type LoginInput,
   type RefreshInput,
   type RegisterInput,
-  type UserProfile,
 } from '@expense/shared';
 import { CurrentUser, type AuthUser } from '../../common/decorators/current-user.decorator.js';
 import { Public } from '../../common/decorators/public.decorator.js';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe.js';
-import { GetUserByIdQuery } from '../../contracts/users/get-user-by-id.query.js';
-import type { UserRecord } from '../../contracts/users/create-user.command.js';
 import { LoginCommand } from './commands/login.command.js';
 import { LogoutCommand } from './commands/logout.command.js';
 import { RefreshTokensCommand } from './commands/refresh-tokens.command.js';
@@ -22,10 +19,7 @@ import { RegisterCommand } from './commands/register.command.js';
 
 @Controller('auth')
 export class AuthController {
-  constructor(
-    private readonly commandBus: CommandBus,
-    private readonly queryBus: QueryBus,
-  ) {}
+  constructor(private readonly commandBus: CommandBus) {}
 
   @Public()
   @Post('register')
@@ -54,21 +48,5 @@ export class AuthController {
     @Body(new ZodValidationPipe(refreshSchema)) dto: RefreshInput,
   ): Promise<void> {
     return this.commandBus.execute(new LogoutCommand(user.id, dto.refreshToken));
-  }
-
-  @Get('me')
-  async me(@CurrentUser() user: AuthUser): Promise<UserProfile> {
-    const record = await this.queryBus.execute<GetUserByIdQuery, UserRecord | null>(
-      new GetUserByIdQuery(user.id),
-    );
-    if (!record) {
-      throw new NotFoundException('Пользователь не найден');
-    }
-    return {
-      id: record.id,
-      email: record.email,
-      name: record.name,
-      createdAt: record.createdAt.toISOString(),
-    };
   }
 }
