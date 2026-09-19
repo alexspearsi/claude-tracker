@@ -24,7 +24,7 @@ export function LoginForm() {
   });
 
   const onSubmit = form.handleSubmit(async (values) => {
-    // При успехе экшен уводит на /expenses и сюда уже не возвращается.
+    // При успехе экшен уводит на /dashboard и сюда уже не возвращается.
     const result = await loginAction(values);
     if (result?.error) {
       toast.error(result.error);

@@ -24,5 +24,5 @@ export async function registerAction(input: RegisterInput): Promise<AuthActionSt
     return { error: apiErrorMessage(error) };
   }
 
-  redirect(ROUTES.expenses);
+  redirect(ROUTES.dashboard);
 }

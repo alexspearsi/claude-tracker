@@ -25,7 +25,7 @@ function decide(request: NextRequest, hasSession: boolean): NextResponse {
     return NextResponse.redirect(new URL(ROUTES.login, request.url));
   }
   if (isGuestOnly(pathname) && hasSession) {
-    return NextResponse.redirect(new URL(ROUTES.expenses, request.url));
+    return NextResponse.redirect(new URL(ROUTES.dashboard, request.url));
   }
   return NextResponse.next();
 }

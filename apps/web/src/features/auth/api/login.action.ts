@@ -26,5 +26,5 @@ export async function loginAction(input: LoginInput): Promise<AuthActionState> {
   }
 
   // Вне try/catch: redirect бросает NEXT_REDIRECT, внутри его перехватил бы catch.
-  redirect(ROUTES.expenses);
+  redirect(ROUTES.dashboard);
 }
