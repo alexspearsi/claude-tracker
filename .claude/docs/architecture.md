@@ -54,8 +54,8 @@ src/
   generated/
     prisma/                     # сгенерированный Prisma-клиент (в git не хранится)
   prisma/
-    prisma.provider.ts           # провайдер PrismaClient по токену PRISMA
-    prisma.module.ts               # @Global, отдаёт PRISMA, закрывает соединение на shutdown
+    prisma.service.ts              # PrismaService extends PrismaClient, driver adapter в super()
+    prisma.module.ts               # @Global, отдаёт PrismaService, закрывает соединение на shutdown
     prisma-errors.ts                # isPrismaError — коды P2002/P2025/P2003
   modules/
     auth/       # register/login/refresh/logout/me — CQRS-команды, TokensService, JwtStrategy
@@ -99,18 +99,18 @@ refresh на новую пару старый токен отзывается (`
 Контракты команд/запросов лежат в `src/contracts/<модуль>/`, а не внутри
 модуля-источника — их импортируют оба модуля без циклической зависимости.
 `transactions` и `categories` (внутри своего CRUD) CQRS не используют —
-прямой вызов `Inject(PRISMA)` в сервисе достаточен, кросс-модульных обращений
-там нет.
+прямой constructor injection `PrismaService` в сервисе достаточен,
+кросс-модульных обращений там нет.
 
 ### Доступ к БД
 
-В Prisma 7 `PrismaClient` — не класс, а конструктор с интерфейсом, поэтому
-`extends PrismaClient` компилируется, но не даёт ни методов, ни моделей.
-Клиент отдаётся провайдером по токену `PRISMA`
-(`src/prisma/prisma.provider.ts`), подключение — через driver adapter
-`@prisma/adapter-pg`. Сервисы получают клиент через `@Inject(PRISMA)`.
-`PrismaModule` глобальный (`@Global()`), поэтому `PRISMA` доступен везде без
-повторного импорта модуля.
+`PrismaService extends PrismaClient` (`src/prisma/prisma.service.ts`), как в
+официальном гайде Prisma по NestJS — driver adapter `@prisma/adapter-pg`
+собирается в конструкторе и передаётся в `super({ adapter })`. Сервисы
+получают клиент обычным constructor injection: `constructor(private readonly
+prisma: PrismaService) {}`, без токена и `@Inject`. `PrismaModule` глобальный
+(`@Global()`), поэтому `PrismaService` доступен везде без повторного импорта
+модуля.
 
 Ошибки Prisma переводятся в HTTP-исключения через `isPrismaError` /
 `PrismaErrorCode` (`src/prisma/prisma-errors.ts`) — каждый сервис делает это

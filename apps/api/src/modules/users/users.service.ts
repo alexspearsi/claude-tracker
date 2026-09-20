@@ -1,12 +1,12 @@
-import { ConflictException, Inject, Injectable } from '@nestjs/common';
-import { PRISMA, type Prisma } from '../../prisma/prisma.provider.js';
+import { ConflictException, Injectable } from '@nestjs/common';
+import { PrismaService } from '../../prisma/prisma.service.js';
 import { isPrismaError, PrismaErrorCode } from '../../prisma/prisma-errors.js';
 import type { UserCredentials } from '../../contracts/users/get-user-by-email.query.js';
 import type { UserRecord } from '../../contracts/users/create-user.command.js';
 
 @Injectable()
 export class UsersService {
-  constructor(@Inject(PRISMA) private readonly prisma: Prisma) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async create(email: string, passwordHash: string, name?: string | null): Promise<UserRecord> {
     try {

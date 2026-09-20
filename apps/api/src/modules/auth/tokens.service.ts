@@ -1,9 +1,9 @@
 import { createHash, randomUUID } from 'node:crypto';
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService, type JwtSignOptions } from '@nestjs/jwt';
 import type { AuthTokens } from '@expense/shared';
-import { PRISMA, type Prisma } from '../../prisma/prisma.provider.js';
+import { PrismaService } from '../../prisma/prisma.service.js';
 import type { JwtPayload } from './jwt.strategy.js';
 
 interface RefreshPayload extends JwtPayload {
@@ -23,7 +23,7 @@ function hashToken(token: string): string {
 @Injectable()
 export class TokensService {
   constructor(
-    @Inject(PRISMA) private readonly prisma: Prisma,
+    private readonly prisma: PrismaService,
     private readonly jwt: JwtService,
     private readonly config: ConfigService,
   ) {}

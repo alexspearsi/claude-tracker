@@ -15,8 +15,8 @@
 ## Новый модуль в api (по образцу `categories`)
 
 Модуль без кросс-модульных обращений (CRUD, фильтруется по `userId`) не
-нуждается в CQRS — используй прямой `@Inject(PRISMA)` в сервисе, как в
-`categories`/`transactions`.
+нуждается в CQRS — используй прямой constructor injection `PrismaService` в
+сервисе, как в `categories`/`transactions`.
 
 1. **Модель в Prisma**, если нужна новая таблица — см. раздел
    «Новая миграция» ниже.
@@ -39,7 +39,7 @@
    ```ts
    @Injectable()
    export class XService {
-     constructor(@Inject(PRISMA) private readonly prisma: Prisma) {}
+     constructor(private readonly prisma: PrismaService) {}
      // каждый метод: where: { id, userId } — изоляция данных по пользователю
    }
    ```

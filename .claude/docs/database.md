@@ -9,7 +9,7 @@ PostgreSQL 16, схема описана в `apps/api/prisma/schema.prisma`, м�
 `importFileExtension = "js"`, клиент пишется в `apps/api/src/generated/prisma`
 (каталог не в git, генерируется командой `npm run prisma:generate`).
 Подключение в рантайме — через driver adapter `@prisma/adapter-pg`, не через
-`url` в схеме (см. `apps/api/src/prisma/prisma.provider.ts`).
+`url` в схеме (см. `apps/api/src/prisma/prisma.service.ts`).
 
 ## Таблицы
 

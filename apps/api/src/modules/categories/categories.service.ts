@@ -1,9 +1,9 @@
-import { ConflictException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { QueryBus } from '@nestjs/cqrs';
 import type { Category } from '@expense/shared';
 import { GetUserByIdQuery } from '../../contracts/users/get-user-by-id.query.js';
 import type { UserRecord } from '../../contracts/users/create-user.command.js';
-import { PRISMA, type Prisma } from '../../prisma/prisma.provider.js';
+import { PrismaService } from '../../prisma/prisma.service.js';
 import { isPrismaError, PrismaErrorCode } from '../../prisma/prisma-errors.js';
 import type { CreateCategoryDto } from './dto/create-category.dto.js';
 import type { UpdateCategoryDto } from './dto/update-category.dto.js';
@@ -19,7 +19,7 @@ interface CategoryRecord {
 @Injectable()
 export class CategoriesService {
   constructor(
-    @Inject(PRISMA) private readonly prisma: Prisma,
+    private readonly prisma: PrismaService,
     private readonly queryBus: QueryBus,
   ) {}
 
