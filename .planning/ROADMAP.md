@@ -14,6 +14,7 @@
 ## Phases
 
 **Phase Numbering:**
+
 - Integer phases (1, 2, 3): Planned milestone work
 - Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
 
@@ -26,6 +27,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 ## Phase Details
 
 ### Phase 1: Категории
+
 **Goal**: Пользователь может полностью управлять своими категориями (создание, редактирование,
 удаление) через рабочую страницу `/categories`, с понятной блокировкой удаления категорий, у
 которых есть связанные транзакции.
@@ -33,6 +35,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Depends on**: Nothing (first phase)
 **Requirements**: CAT-01, CAT-02, CAT-03, CAT-04, CAT-05
 **Success Criteria** (what must be TRUE):
+
   1. Пользователь может создать категорию, указав название и цвет из предустановленной палитры.
   2. Пользователь может отредактировать название и цвет существующей категории.
   3. Пользователь может удалить категорию через диалог подтверждения.
@@ -43,13 +46,22 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans:** 3 plans
 
 Plans:
+**Wave 1**
+
 - [ ] 01-01-PLAN.md — Сквозной срез: `/categories` со списком категорий и созданием через Dialog (CAT-01, CAT-05)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 01-02-PLAN.md — Редактирование, удаление и блокировка удаления занятой категории (CAT-02, CAT-03, CAT-04)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [ ] 01-03-PLAN.md — Актуализация документации и полный ручной приёмочный проход CAT-01..CAT-05
 
 **UI hint**: yes
 
 ### Phase 2: Транзакции
+
 **Goal**: Пользователь может фиксировать, просматривать и поддерживать в актуальном состоянии
 все свои транзакции (доходы и расходы) — как с дашборда через быстрое добавление, так и на
 странице `/expenses`, через одну общую форму.
@@ -57,6 +69,7 @@ Plans:
 **Depends on**: Phase 1 (пикер категории в форме транзакции нуждается в реальных категориях)
 **Requirements**: TXN-01, TXN-02, TXN-03, TXN-04, TXN-05, TXN-06
 **Success Criteria** (what must be TRUE):
+
   1. Пользователь может добавить транзакцию (доход или расход) с типом-переключателем, суммой,
      категорией, датой (по умолчанию сегодня) и необязательным описанием — и с `/dashboard`
      (быстрое добавление), и с `/expenses`, через одну и ту же общую форму.
@@ -71,12 +84,14 @@ Plans:
 **UI hint**: yes
 
 ### Phase 3: Сводка и баланс
+
 **Goal**: Пользователь видит своё финансовое положение одним взглядом — баланс, доходы и
 расходы за текущий месяц, а также разбивку по категориям.
 **Mode:** mvp
 **Depends on**: Phase 2 (сводка осмысленна только когда транзакции можно создавать через UI)
 **Requirements**: SUM-01, SUM-02
 **Success Criteria** (what must be TRUE):
+
   1. Пользователь видит на дашборде баланс, доходы и расходы за текущий месяц, основанные на
      `GET /transactions/summary`.
   2. Пользователь видит таблицу с разбивкой доходов/расходов по категориям (сумма, категория,
