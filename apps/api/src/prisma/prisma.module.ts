@@ -1,13 +1,13 @@
-import { Global, Inject, Module, type OnApplicationShutdown } from '@nestjs/common';
-import { PRISMA, prismaProvider, type Prisma } from './prisma.provider.js';
+import { Global, Module, type OnApplicationShutdown } from '@nestjs/common';
+import { PrismaService } from './prisma.service.js';
 
 @Global()
 @Module({
-  providers: [prismaProvider],
-  exports: [PRISMA],
+  providers: [PrismaService],
+  exports: [PrismaService],
 })
 export class PrismaModule implements OnApplicationShutdown {
-  constructor(@Inject(PRISMA) private readonly prisma: Prisma) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async onApplicationShutdown(): Promise<void> {
     await this.prisma.$disconnect();

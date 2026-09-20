@@ -10,7 +10,7 @@
     "node": ">=22"
   },
   "scripts": {
-    "dev": "npm run build -w packages/shared && npm run dev --workspaces --if-present",
+    "dev": "npm run build -w packages/shared && concurrently -n api,web -c blue,green \"npm:dev:api\" \"npm:dev:web\"",
     "dev:web": "npm run dev -w apps/web",
     "dev:api": "npm run dev -w apps/api",
     "build": "npm run build -w packages/shared && npm run build -w apps/api && npm run build -w apps/web",
@@ -23,6 +23,7 @@
     "prisma:studio": "npm run prisma:studio -w apps/api"
   },
   "devDependencies": {
+    "concurrently": "10.0.5",
     "typescript": "6.0.3"
   }
 }

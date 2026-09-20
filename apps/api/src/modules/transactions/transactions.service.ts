@@ -1,8 +1,7 @@
-import { ConflictException, Inject, Injectable, NotFoundException } from '@nestjs/common';
-// Prisma = PrismaClient (см. prisma.provider.ts), поэтому неймспейс клиента — под алиасом.
-import { Prisma as PrismaNs } from '../../generated/prisma/client.js';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma } from '../../generated/prisma/client.js';
 import { TransactionType } from '../../generated/prisma/enums.js';
-import { PRISMA, type Prisma } from '../../prisma/prisma.provider.js';
+import { PrismaService } from '../../prisma/prisma.service.js';
 import { isPrismaError, PrismaErrorCode } from '../../prisma/prisma-errors.js';
 import type { CreateTransactionDto } from './dto/create-transaction.dto.js';
 import { LIMIT_DEFAULT } from './dto/transaction-validation.js';
@@ -17,7 +16,7 @@ import type {
 
 interface TransactionRecord {
   id: string;
-  amount: PrismaNs.Decimal;
+  amount: Prisma.Decimal;
   type: TransactionType;
   description: string | null;
   date: Date;
@@ -29,7 +28,7 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 
 @Injectable()
 export class TransactionsService {
-  constructor(@Inject(PRISMA) private readonly prisma: Prisma) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   // Все методы фильтруют по userId: транзакции одного пользователя не видны другому.
   async findAll(userId: string, query: TransactionQueryDto): Promise<TransactionListDto> {
@@ -131,7 +130,7 @@ export class TransactionsService {
       }),
     ]);
 
-    const zero = new PrismaNs.Decimal(0);
+    const zero = new Prisma.Decimal(0);
     const income = byType.find((r) => r.type === TransactionType.INCOME)?._sum.amount ?? zero;
     const expense = byType.find((r) => r.type === TransactionType.EXPENSE)?._sum.amount ?? zero;
     const balance = income.minus(expense);

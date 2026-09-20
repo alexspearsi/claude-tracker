@@ -100,7 +100,7 @@ apps/
       modules/            # auth, users, categories, transactions
       common/              # гварды, декораторы, фильтры, пайпы
       contracts/           # CQRS-команды и запросы
-      prisma/               # провайдер PrismaClient (токен PRISMA)
+      prisma/               # PrismaService (extends PrismaClient)
       config/               # валидация env
     prisma/                # schema.prisma и миграции
   web/                     # Next.js фронтенд
