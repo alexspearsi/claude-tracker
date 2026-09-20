@@ -25,6 +25,11 @@ npm run prisma:studio
 как обычный пакет через workspaces и видят `dist`, а не исходники. После правки схем в
 shared нужен его пересбор, иначе изменения не доедут до потребителей.
 
+`npm run dev` поднимает `api` и `web` через `concurrently` — у npm нет флага `--parallel` для
+`npm run --workspaces`, он выполняет скрипты воркспейсов последовательно. `dev` в `apps/api`
+(`nest start --watch`) не завершается сам, поэтому без `concurrently` очередь до `apps/web`
+просто не доходила бы и фронт не стартовал.
+
 Тестов в проекте нет — раннер не настроен.
 
 **ESLint закреплён на 9.x, не 10.** Плагины из `eslint-config-next` (прежде всего
@@ -66,10 +71,19 @@ shared нужен его пересбор, иначе изменения не д
 декоратором `@Public()`. Локальный `@UseGuards(JwtAuthGuard)` в feature-модуле уронит
 приложение на старте с `UnknownDependenciesException`.
 
-**Доступ к БД — через провайдер, не через наследование.** В Prisma 7 `PrismaClient` не класс,
-а конструктор с интерфейсом, поэтому `extends PrismaClient` компилируется, но не даёт ни
-методов, ни моделей. Клиент отдаётся провайдером по токену `PRISMA`
-(`apps/api/src/prisma/prisma.provider.ts`), сервисы получают его через `@Inject(PRISMA)`.
+**Доступ к БД — через `PrismaService`, как в официальном гайде Prisma по NestJS.**
+`PrismaService extends PrismaClient` (`apps/api/src/prisma/prisma.service.ts`), driver adapter
+(`@prisma/adapter-pg`) собирается в конструкторе и передаётся через `super({ adapter })`.
+Сервисы получают клиент обычным constructor injection: `constructor(private readonly prisma: PrismaService)`,
+без токена и `@Inject`. Раньше в проекте был провайдер по символьному токену `PRISMA` — от него
+отказались: предполагаемая причина («PrismaClient — не класс, extends не даёт методов»)
+не подтвердилась. Прямой рантайм-тест (создать `PrismaService` и проверить `typeof svc.user`,
+`typeof svc.$transaction`) показал, что делегаты моделей и методы клиента после `extends`
+на месте и в связке с кастомным `output` + `moduleFormat: "esm"` + driver adapter, которая
+используется в этом проекте. Нюанс: `instanceof PrismaClient` для инстанса **всегда** `false` —
+даже без наследования, у голого `new PrismaClient(...)` — потому что сгенерированный клиент
+оборачивается в Proxy; на DI и вызовы методов это не влияет, полагаться на `instanceof` для
+Prisma-клиента просто нельзя.
 Ошибки Prisma (`P2002` — unique, `P2025` — запись не найдена, `P2003` — нарушение внешнего
 ключа) переводятся в HTTP-исключения через `isPrismaError` из `apps/api/src/prisma/prisma-errors.ts`.
 `P2003` возникает у `DELETE /categories/:id`, если по категории есть транзакции
@@ -168,33 +182,10 @@ Component при рендере бросает исключение, разре�
 - Версии зависимостей проверяй по реестру (`npm view <пакет> version`), а не по памяти —
   в этом стеке несколько пакетов ушли на мажор вперёд относительно привычных значений.
 
-## Ветки — GitHub Flow
+## Ветки, коммиты и PR
 
-Работаем по GitHub Flow: `master` — всегда деплойный, изменения идут через короткоживущие
-ветки и Pull Request.
-
-- Новую работу начинай от актуального `master`: `git checkout master && git pull`, затем
-  `git checkout -b <тип>/<короткое-название>`.
-- Префикс ветки — `feature/`, `fix/`, `chore/`, `docs/` по смыслу изменений; название —
-  коротко и на английском (`feature/dashboard`, а не `feature/glavnyj-ekran`).
-- Коммитить и пушить в ветку можно часто, до готовности — открывать PR в `master` можно и
-  до завершения работы (черновиком), чтобы был виден прогресс и CI.
-- Слияние в `master` — через PR (`gh pr create`), не прямым пушем в `master`.
-- После мержа ветку удаляй — GitHub делает это в UI, локально: `git branch -d <ветка>`.
-
-**Перед `gh pr create` смотри `git diff master...HEAD`** (а не только последний коммит) —
-описание PR должно перечислять реализованное и изменённые/добавленные endpoints по всей
-ветке, а не только по свежему коммиту. Заголовок — по Conventional Commits (см. ниже).
-Тело PR — коротким `## Summary` (что сделано, какие endpoints) и `## Test plan`.
-
-## Соглашение о коммитах
-
-Используй Conventional Commits:
-
-- Тип: feat, fix, docs, refactor, test, ci
-- Область (scope): модуль или область изменений
-- Описание на английском, кратко
-- Breaking changes помечай восклицательным знаком
+Правила GitHub Flow, Conventional Commits и оформления PR вынесены в скилл `commit`
+(`.claude/skills/commit/SKILL.md`) — обращайся к нему при создании веток, коммитов и PR.
 
 ## Состояние
 
