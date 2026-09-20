@@ -40,7 +40,13 @@ Decimal phases appear between their surrounding integers in numeric order.
      сообщение о блокировке (а не сырой текст ошибки API), и удаление не происходит.
   5. Страница `/categories` показывает полный список категорий пользователя как рабочий CRUD,
      а не заглушку.
-**Plans**: TBD
+**Plans:** 3 plans
+
+Plans:
+- [ ] 01-01-PLAN.md — Сквозной срез: `/categories` со списком категорий и созданием через Dialog (CAT-01, CAT-05)
+- [ ] 01-02-PLAN.md — Редактирование, удаление и блокировка удаления занятой категории (CAT-02, CAT-03, CAT-04)
+- [ ] 01-03-PLAN.md — Актуализация документации и полный ручной приёмочный проход CAT-01..CAT-05
+
 **UI hint**: yes
 
 ### Phase 2: Транзакции
@@ -85,6 +91,6 @@ Phases execute in numeric order: 1 → 2 → 3
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Категории | 0/TBD | Not started | - |
+| 1. Категории | 0/3 | Not started | - |
 | 2. Транзакции | 0/TBD | Not started | - |
 | 3. Сводка и баланс | 0/TBD | Not started | - |
