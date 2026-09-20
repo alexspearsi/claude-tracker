@@ -69,16 +69,16 @@
 
 | REQ-ID | Phase |
 |--------|-------|
-| TXN-01 | — |
-| TXN-02 | — |
-| TXN-03 | — |
-| TXN-04 | — |
-| TXN-05 | — |
-| TXN-06 | — |
-| CAT-01 | — |
-| CAT-02 | — |
-| CAT-03 | — |
-| CAT-04 | — |
-| CAT-05 | — |
-| SUM-01 | — |
-| SUM-02 | — |
+| TXN-01 | Phase 2 |
+| TXN-02 | Phase 2 |
+| TXN-03 | Phase 2 |
+| TXN-04 | Phase 2 |
+| TXN-05 | Phase 2 |
+| TXN-06 | Phase 2 |
+| CAT-01 | Phase 1 |
+| CAT-02 | Phase 1 |
+| CAT-03 | Phase 1 |
+| CAT-04 | Phase 1 |
+| CAT-05 | Phase 1 |
+| SUM-01 | Phase 3 |
+| SUM-02 | Phase 3 |
