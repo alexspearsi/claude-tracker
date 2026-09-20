@@ -1,4 +1,8 @@
+import type { Metadata } from 'next';
+import { CategoriesView } from '@/views/categories/ui/categories-view';
+
+export const metadata: Metadata = { title: 'Категории — Трекер расходов' };
+
 export default function CategoriesPage() {
-  // TODO: список категорий с созданием и редактированием.
-  return <main className="p-6">Категории</main>;
+  return <CategoriesView />;
 }
