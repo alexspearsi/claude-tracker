@@ -16,8 +16,21 @@
 
 Для роутов на `ZodValidationPipe` (auth) в `error` дополнительно есть
 `issues` (результат `z.treeifyError`). Для роутов на `ValidationPipe`
-(categories, transactions) `error.message` — массив строк
-(`errorFormat: 'grouped'`, whitelist + forbidNonWhitelisted).
+(categories, transactions) с `errorFormat: 'grouped'` (whitelist +
+forbidNonWhitelisted, см. `apps/api/src/main.ts`) `error.message` — **не
+строка и не массив**, а объект, где ключ — имя поля, значение — массив
+сообщений этого поля:
+
+```json
+{ "error": { "message": { "name": ["Название не может быть пустым"] } } }
+```
+
+На фронте этот формат разбирает `extractFieldErrors`
+(`apps/web/src/shared/api/error-message.ts`) и кладёт результат в
+`form.setError` по каждому полю; `apiErrorMessage` (тот же файл) обрабатывает
+остальные формы ответа (409, 404, сеть, 5xx) для тостов. Без
+`extractFieldErrors` объектный `error.message` попадает в общий фолбэк, и
+пользователь видит сообщение о недоступности сервиса вместо ошибки поля.
 
 **Авторизация:** все эндпоинты, кроме помеченных `Public`, требуют
 `Authorization: Bearer <access_token>`. Без валидного токена — `401`.

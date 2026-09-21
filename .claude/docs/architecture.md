@@ -179,7 +179,7 @@ DTO в контроллерах импортируются **значением*
 |---|---|---|
 | `app/` | только роутинг Next: layout'ы, `page.tsx` в 3–5 строк, `metadata` | `app/(auth)/login/page.tsx` |
 | `views/` | экраны целиком | `views/login/ui/login-view.tsx` |
-| `widgets/` | самостоятельные блоки страницы (пока пусто) | — |
+| `widgets/` | самостоятельные блоки страницы | `widgets/category-list/ui/category-list.tsx` |
 | `features/` | действия пользователя: формы, Server Actions | `features/auth/api/login.action.ts` |
 | `entities/` | предметные сущности | `entities/session` — токены в куках |
 | `shared/` | переиспользуемое: `ui`, `lib`, `api`, `config` | `shared/ui/button.tsx` |
@@ -208,6 +208,23 @@ DTO в контроллерах импортируются **значением*
 куки и передаёт его в `apiFetch` как `accessToken` (заголовок
 `Authorization: Bearer`); JWT-стратегия на api куки не читает.
 
+### Срез категорий (CRUD)
+
+Цепочка `app/(dashboard)/categories/page.tsx` → `views/categories` →
+`widgets/category-list` → `features/category-form` (Server Actions +
+`Dialog`/`AlertDialog`) → `entities/category/api`. Два момента, которые не
+выводятся из общего описания FSD выше:
+
+- Вью (`views/categories/ui/categories-view.tsx`) остаётся чистым серверным
+  компонентом; клиентская граница опускается на уровень виджета
+  (`widgets/category-list`), потому что состоянием открытия модалок
+  (`Dialog`/`AlertDialog`) должен владеть клиент.
+- Мутации категорий ревалидируют три пути сразу через
+  `CATEGORY_AFFECTED_PATHS` (`/categories`, `/dashboard`, `/expenses`,
+  `features/category-form/model/affected-paths.ts`) — имя и цвет категории
+  рендерятся в строках транзакций на соседних экранах, ревалидации только
+  `/categories` недостаточно.
+
 ### Защита роутов и обновление токена
 
 `apps/web/src/proxy.ts` — в Next 16 конвенция `middleware.ts` переименована в
@@ -235,8 +252,8 @@ Server Action, Route Handler и proxy.
 - Неизвестный роут отдаёт HTML от Express мимо `HttpExceptionFilter` (см.
   «Обработка ошибок» выше).
 - Тестового раннера в проекте нет.
-- Страницы трат и категорий на фронте — заглушки без данных, транзакции с UI
-  пока не связаны.
+- Страница `/expenses` на фронте — заглушка без данных, транзакции с UI пока
+  не связаны (`/categories` уже работает как полноценный CRUD).
 
 См. также `dev-guide.md` (как добавить модуль/фичу/миграцию), `api.md`
 (список эндпоинтов), `database.md` (схема БД).
