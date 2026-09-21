@@ -3,6 +3,8 @@ import { getSession } from '@/entities/session/api/session';
 import { getCurrentUser } from '@/entities/user/api/get-current-user';
 import { userDisplayName } from '@/entities/user/lib/display-name';
 import { ROUTES } from '@/shared/config/routes';
+import { loadMonthlySummary } from '@/widgets/monthly-summary/api/load-monthly-summary';
+import { MonthlySummary } from '@/widgets/monthly-summary/ui/monthly-summary';
 import { QuickAddTransaction } from '@/widgets/quick-add-transaction/ui/quick-add-transaction';
 import { loadRecentTransactions } from '@/widgets/recent-transactions/api/load-recent-transactions';
 import { RecentTransactions } from '@/widgets/recent-transactions/ui/recent-transactions';
@@ -17,8 +19,9 @@ export async function DashboardView({ page }: DashboardViewProps) {
     redirect(ROUTES.login);
   }
 
-  const [result, profile] = await Promise.all([
+  const [result, summaryResult, profile] = await Promise.all([
     loadRecentTransactions(session.accessToken, page),
+    loadMonthlySummary(session.accessToken),
     // Профиль уже запросила шапка (AppHeader) — cache() дедуплицирует вызов в
     // пределах рендера, второй сетевой запрос не уходит. .catch: приветствие
     // необязательно, ошибка здесь не должна ронять страницу.
@@ -28,7 +31,7 @@ export async function DashboardView({ page }: DashboardViewProps) {
   // redirect — вне try/catch: результат уже вычислен, catch тут ни при чём.
   // На /session-expired, а не /login: там куки физически чистятся — см. комментарий
   // в widgets/app-header/ui/app-header.tsx и app/session-expired/route.ts.
-  if (result.status === 'unauthorized') {
+  if (result.status === 'unauthorized' || summaryResult.status === 'unauthorized') {
     redirect(ROUTES.sessionExpired);
   }
 
@@ -37,6 +40,12 @@ export async function DashboardView({ page }: DashboardViewProps) {
       <h1 className="text-2xl font-semibold">
         {profile ? `Привет, ${userDisplayName(profile)}!` : 'Главная'}
       </h1>
+
+      {summaryResult.status === 'error' ? (
+        <p className="text-sm text-destructive">Не удалось загрузить сводку: {summaryResult.message}</p>
+      ) : (
+        <MonthlySummary summary={summaryResult.summary} />
+      )}
 
       {result.status === 'error' ? (
         <p className="text-sm text-destructive">Не удалось загрузить данные: {result.message}</p>
