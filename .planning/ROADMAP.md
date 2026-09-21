@@ -80,7 +80,29 @@ Plans:
      заглушку.
   5. Пользователь может отфильтровать список транзакций по периоду, типу (доход/расход) и
      категории.
-**Plans**: TBD
+**Plans:** 5 plans
+
+Plans:
+**Wave 1**
+
+- [ ] 02-01-PLAN.md — Сквозной срез: добавление транзакции с `/dashboard` через общую форму в Dialog (TXN-01, TXN-05)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 02-02-PLAN.md — `/expenses` как рабочий список с пагинацией и второй точкой входа в ту же форму (TXN-04, TXN-05)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
+- [ ] 02-03-PLAN.md — Редактирование и удаление транзакции из списка (TXN-02, TXN-03)
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
+- [ ] 02-04-PLAN.md — Фильтры по периоду, типу и категории через строку запроса (TXN-06)
+
+**Wave 5** *(blocked on Wave 4 completion)*
+
+- [ ] 02-05-PLAN.md — Актуализация документации и полный ручной приёмочный проход TXN-01..TXN-06
+
 **UI hint**: yes
 
 ### Phase 3: Сводка и баланс
@@ -107,5 +129,5 @@ Phases execute in numeric order: 1 → 2 → 3
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Категории | 3/3 | Complete    | 2026-09-21 |
-| 2. Транзакции | 0/TBD | Not started | - |
+| 2. Транзакции | 0/5 | Planned | - |
 | 3. Сводка и баланс | 0/TBD | Not started | - |
