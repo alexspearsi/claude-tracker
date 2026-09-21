@@ -80,7 +80,7 @@ Plans:
      заглушку.
   5. Пользователь может отфильтровать список транзакций по периоду, типу (доход/расход) и
      категории.
-**Plans:** 2/5 plans executed
+**Plans:** 3/5 plans executed
 
 Plans:
 **Wave 1**
@@ -93,7 +93,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 02-03-PLAN.md — Редактирование и удаление транзакции из списка (TXN-02, TXN-03)
+- [x] 02-03-PLAN.md — Редактирование и удаление транзакции из списка (TXN-02, TXN-03)
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
@@ -129,5 +129,5 @@ Phases execute in numeric order: 1 → 2 → 3
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Категории | 3/3 | Complete    | 2026-09-21 |
-| 2. Транзакции | 2/5 | In Progress|  |
+| 2. Транзакции | 3/5 | In Progress|  |
 | 3. Сводка и баланс | 0/TBD | Not started | - |
