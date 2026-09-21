@@ -1,8 +1,9 @@
 ---
 phase: 01-kategorii
 verified: 2026-09-21T00:00:00Z
-status: gaps_found
-score: 12/13 must-haves verified
+status: gaps_found_then_fixed
+score: 13/13 must-haves verified after fix (commit 8a5377d)
+gap_fix_note: "Gap 12 (truncation) fixed inline after verification — w-full max-w-0 on TableCell + min-w-0 on flex containers. Manually confirmed in browser: 47-char name truncates to 'Пятьд…', action buttons stay aligned. See commit 8a5377d."
 covered_files: [".claude/CLAUDE.md", ".claude/docs/api.md", ".claude/docs/architecture.md", ".claude/docs/dev-guide.md", ".planning/REQUIREMENTS.md", ".planning/phases/01-kategorii/01-01-PLAN.md", ".planning/phases/01-kategorii/01-01-SUMMARY.md", ".planning/phases/01-kategorii/01-02-PLAN.md", ".planning/phases/01-kategorii/01-02-SUMMARY.md", ".planning/phases/01-kategorii/01-03-PLAN.md", ".planning/phases/01-kategorii/01-03-SUMMARY.md", "apps/web/src/app/(dashboard)/categories/page.tsx", "apps/web/src/entities/category/api/create-category.ts", "apps/web/src/entities/category/api/delete-category.ts", "apps/web/src/entities/category/api/update-category.ts", "apps/web/src/features/category-form/api/create-category.action.ts", "apps/web/src/features/category-form/api/delete-category.action.ts", "apps/web/src/features/category-form/api/update-category.action.ts", "apps/web/src/features/category-form/model/affected-paths.ts", "apps/web/src/features/category-form/model/palette.ts", "apps/web/src/features/category-form/model/types.ts", "apps/web/src/features/category-form/ui/category-delete-dialog.tsx", "apps/web/src/features/category-form/ui/category-form.tsx", "apps/web/src/features/category-form/ui/color-swatch-picker.tsx", "apps/web/src/shared/api/error-message.ts", "apps/web/src/shared/ui/alert-dialog.tsx", "apps/web/src/shared/ui/dialog.tsx", "apps/web/src/views/categories/ui/categories-view.tsx", "apps/web/src/widgets/category-list/ui/category-list.tsx", "apps/web/src/widgets/category-list/ui/empty-state.tsx"]
 covered_digest: "v1:sha256:9a8ebd5224358d1c343dce507d8028e4b9ca3acb1e1a2fd80a43e458559c5bfd"
 behavior_unverified: 0
@@ -26,8 +27,8 @@ human_verification: []
 
 **Phase Goal:** Пользователь может полностью управлять своими категориями (создание, редактирование, удаление) через рабочую страницу `/categories`, с понятной блокировкой удаления категорий, у которых есть связанные транзакции.
 **Verified:** 2026-09-21
-**Status:** gaps_found
-**Re-verification:** No — initial verification
+**Status:** gaps_found_then_fixed (12/13 at verification time → 13/13 after inline fix in commit `8a5377d`)
+**Re-verification:** No — initial verification found 1 gap, which was fixed and manually re-confirmed in-browser immediately after (not via a full re-verify agent run)
 
 ## Goal Achievement
 
