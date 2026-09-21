@@ -22,8 +22,7 @@ interface CategoryListProps {
 
 /** Клиентская граница среза категорий — держит состояние открытия диалогов. */
 export function CategoryList({ categories }: CategoryListProps) {
-  // План 01-02 расширит тип до Category | 'create' | null.
-  const [formTarget, setFormTarget] = useState<'create' | null>(null);
+  const [formTarget, setFormTarget] = useState<Category | 'create' | null>(null);
 
   return (
     <Card>
@@ -55,7 +54,17 @@ export function CategoryList({ categories }: CategoryListProps) {
                       <span className="truncate">{category.name}</span>
                     </span>
                   </TableCell>
-                  <TableCell />
+                  <TableCell className="text-right">
+                    <div className="flex justify-end gap-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setFormTarget(category)}
+                      >
+                        Редактировать
+                      </Button>
+                    </div>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -65,7 +74,8 @@ export function CategoryList({ categories }: CategoryListProps) {
 
       {formTarget !== null && (
         <CategoryForm
-          key={formTarget}
+          key={formTarget === 'create' ? 'create' : formTarget.id}
+          category={formTarget === 'create' ? undefined : formTarget}
           open
           onOpenChange={(next) => {
             if (!next) {

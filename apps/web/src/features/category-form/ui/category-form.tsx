@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { createCategorySchema, type Category, type CreateCategoryInput } from '@expense/shared';
 import { createCategoryAction } from '@/features/category-form/api/create-category.action';
+import { updateCategoryAction } from '@/features/category-form/api/update-category.action';
 import { CATEGORY_COLORS } from '@/features/category-form/model/palette';
 import type { CategoryFormValues } from '@/features/category-form/model/types';
 import { ColorSwatchPicker } from '@/features/category-form/ui/color-swatch-picker';
@@ -27,21 +28,26 @@ import {
 import { Input } from '@/shared/ui/input';
 
 interface CategoryFormProps {
-  /** undefined → создание; заполненный → редактирование (D-02). В этом плане вызывающая
-   *  сторона передаёт только undefined — ветка редактирования включается планом 01-02. */
+  /** undefined → создание; заполненный → редактирование (D-02). */
   category?: Category;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
 export function CategoryForm({ category, open, onOpenChange }: CategoryFormProps) {
+  // Резолвер один на оба режима: в форме всегда присутствуют оба поля, «частичность»
+  // обновления применяется уже в экшене, а не здесь.
   const form = useForm<CategoryFormValues, unknown, CreateCategoryInput>({
     resolver: zodResolver(createCategorySchema),
-    defaultValues: category ?? { name: '', color: CATEGORY_COLORS[0] },
+    defaultValues: category
+      ? { name: category.name, color: category.color }
+      : { name: '', color: CATEGORY_COLORS[0] },
   });
 
   const onSubmit = form.handleSubmit(async (values) => {
-    const result = await createCategoryAction(values);
+    const result = category
+      ? await updateCategoryAction(category.id, values)
+      : await createCategoryAction(values);
 
     // CategoryActionState — не дискриминированный по общему полю union, поэтому
     // сужаем через 'in', а не через result?.error (последнее не типизируется).
@@ -70,7 +76,7 @@ export function CategoryForm({ category, open, onOpenChange }: CategoryFormProps
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Новая категория</DialogTitle>
+          <DialogTitle>{category ? 'Изменить категорию' : 'Новая категория'}</DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
@@ -108,7 +114,7 @@ export function CategoryForm({ category, open, onOpenChange }: CategoryFormProps
 
             <Button type="submit" className="mt-2 w-full" disabled={isSubmitting}>
               {isSubmitting ? <Loader2Icon className="animate-spin" /> : null}
-              Создать
+              {category ? 'Сохранить' : 'Создать'}
             </Button>
           </form>
         </Form>
