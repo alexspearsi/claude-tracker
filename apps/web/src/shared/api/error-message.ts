@@ -56,3 +56,26 @@ export function apiErrorMessage(error: unknown): string {
 
   return FALLBACK;
 }
+
+/**
+ * Тело grouped-ошибки `ValidationPipe` (`errorFormat: 'grouped'`, см. `main.ts`):
+ * `error.message` — не строка, а объект `{ поле: [сообщения] }`. Используется
+ * DTO-роутами (категории, транзакции), в отличие от Zod-роутов auth.
+ */
+export function extractFieldErrors(error: unknown): Record<string, string> | null {
+  if (!(error instanceof ApiError) || error.status !== 400) {
+    return null;
+  }
+  const body = error.body as NestErrorBody | null;
+  const message = body?.error?.message;
+  if (typeof message !== 'object' || message === null || Array.isArray(message)) {
+    return null;
+  }
+  const result: Record<string, string> = {};
+  for (const [field, messages] of Object.entries(message as Record<string, unknown>)) {
+    if (Array.isArray(messages) && typeof messages[0] === 'string') {
+      result[field] = messages[0];
+    }
+  }
+  return Object.keys(result).length > 0 ? result : null;
+}

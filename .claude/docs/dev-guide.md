@@ -157,20 +157,34 @@
 
 ---
 
-## Связать фронт с реальными данными (страницы-заглушки)
+## Связать фронт с реальными данными
 
-Страницы `expenses`/`categories` сейчас — статичная разметка без запросов.
-Чтобы подключить их к api:
+Категории уже подключены к api — `/categories` работает как полноценный
+CRUD, и это готовый образец для следующего экрана. Незаполненной остаётся
+только `/expenses` (фаза 2). Рецепт подключения:
 
 1. Данные читаются в Server Component (`views/<экран>/ui/*.tsx` или прямо в
    `app/.../page.tsx`, если экран простой) через `apiFetch` с access-токеном
-   из `getSession()` — как в auth-экшенах, но `GET` без формы.
+   из `getSession()` — как в auth-экшенах, но `GET` без формы. Образец:
+   `views/categories/ui/categories-view.tsx`.
 2. Мутации (создание/правка/удаление) — Server Actions в `features/`, по
    образцу `features/auth/api/*.action.ts`, только без `setSession`/`redirect`
    в конце: вместо этого `revalidatePath`, чтобы Server Component
-   перечитал список.
+   перечитал список. Ревалидировать нужно все затронутые пути сразу, а не
+   только текущий экран — готовый список путей держи рядом с фичей (образец:
+   `CATEGORY_AFFECTED_PATHS` в `features/category-form/model/affected-paths.ts`).
+   Образец экшена: `features/category-form/api/create-category.action.ts`.
 3. Список категорий для формы транзакции — переиспользуй тип `Category` из
    `@expense/shared`, не создавай параллельный.
+4. Ошибки мутаций на DTO-роутах (категории, транзакции) разбирай через
+   `extractFieldErrors` (`shared/api/error-message.ts`) **до** фолбэка на
+   `apiErrorMessage` — иначе 400 с объектным `error.message` уходит в общее
+   сообщение о недоступности сервиса вместо ошибки конкретного поля.
+   Образец: `create-category.action.ts` + `features/category-form/ui/category-form.tsx`.
+5. Клиентскую границу опускай до виджета, а вью оставляй серверным
+   компонентом: `widgets/category-list/ui/category-list.tsx` владеет
+   состоянием `Dialog`/`AlertDialog`, а `views/categories/ui/categories-view.tsx`
+   остаётся без `'use client'`.
 
 ---
 
