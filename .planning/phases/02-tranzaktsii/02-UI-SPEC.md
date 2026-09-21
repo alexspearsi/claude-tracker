@@ -130,6 +130,18 @@ Unchanged from `01-UI-SPEC.md` — inherited, not re-derived:
 | Heading | 24px (`text-2xl`) | 600 (semibold) | 1.2 |
 | Display | 30px (`text-3xl`) | 600 (semibold) | 1.2 — not used this phase, declared for contract completeness only |
 
+**Accepted exception — 3 distinct weight values (400/500/600), checker Dimension 4 limit is 2.**
+This is not a Phase 2 decision: `Label` is hardcoded to `font-medium` (500) in the shared,
+already-shipped `apps/web/src/shared/ui/label.tsx` (`shadcn` primitive, used app-wide since
+before Phase 1 — auth forms included). `Heading` at 600 mirrors the existing `dashboard-view.tsx`
+`h1`. Collapsing either value in this phase's spec would misdescribe already-rendered production
+UI without changing it — the actual fix (merging Label into Body's weight, or vice versa) is an
+app-wide design-system change to `shared/ui/label.tsx`, out of scope for a transaction-CRUD phase
+and would silently alter every existing form (login, register, categories) as a side effect.
+Deferred to a future dedicated design-system cleanup phase, not blocking here. Phase 1's own
+UI-SPEC carried the identical 3-value table and was approved — this is a pre-existing, systemic
+constraint, not new debt introduced by Phase 2.
+
 One addition specific to this phase: the signed amount (`TransactionAmount`, D-03, already
 implemented and reused verbatim) uses `font-medium tabular-nums` on top of the inherited `Body`
 size — `tabular-nums` is required so amount columns in the `/expenses` table stay vertically
@@ -137,6 +149,17 @@ aligned as digits vary, and is declared here because it is a new typographic det
 table view depends on, not present in Phase 1's category table.
 
 ---
+
+## Visual Hierarchy — Focal Points
+
+Per-screen primary visual anchor (checker Dimension 2):
+
+| Screen | Focal point |
+|--------|-------------|
+| `/expenses` list | The transactions `Table` itself — the data the user came to see; the "Добавить транзакцию" CTA is secondary (top-right, accent color draws the eye there second) |
+| `TransactionForm` (Dialog, both entry points) | The amount input — first meaningful field after the type toggle, largest single value on screen |
+| Delete confirmation (`AlertDialog`) | The destructive "Удалить" button — the one decision the dialog exists to force |
+| Filter panel | No single focal point — a horizontal row of equal-weight controls (period, type, category), consistent with `01-UI-SPEC.md`'s "no accent overuse" rule; none of the three filters outranks the others |
 
 ## Color
 
