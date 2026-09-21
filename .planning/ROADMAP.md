@@ -21,7 +21,7 @@
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Категории** - Полноценный CRUD категорий на `/categories` с блокировкой удаления занятых категорий (completed 2026-09-21)
-- [ ] **Phase 2: Транзакции** - Полноценный CRUD транзакций через общую форму на `/dashboard` и `/expenses`, с фильтрами
+- [x] **Phase 2: Транзакции** - Полноценный CRUD транзакций через общую форму на `/dashboard` и `/expenses`, с фильтрами (completed 2026-09-21)
 - [ ] **Phase 3: Сводка и баланс** - Баланс/доходы/расходы за месяц и разбивка по категориям на дашборде
 
 ## Phase Details
@@ -80,7 +80,7 @@ Plans:
      заглушку.
   5. Пользователь может отфильтровать список транзакций по периоду, типу (доход/расход) и
      категории.
-**Plans:** 4/5 plans executed
+**Plans:** 5/5 plans executed
 
 Plans:
 **Wave 1**
@@ -101,7 +101,7 @@ Plans:
 
 **Wave 5** *(blocked on Wave 4 completion)*
 
-- [ ] 02-05-PLAN.md — Актуализация документации и полный ручной приёмочный проход TXN-01..TXN-06
+- [x] 02-05-PLAN.md — Актуализация документации и полный ручной приёмочный проход TXN-01..TXN-06
 
 **UI hint**: yes
 
@@ -129,5 +129,5 @@ Phases execute in numeric order: 1 → 2 → 3
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Категории | 3/3 | Complete    | 2026-09-21 |
-| 2. Транзакции | 4/5 | In Progress|  |
+| 2. Транзакции | 5/5 | Complete   | 2026-09-21 |
 | 3. Сводка и баланс | 0/TBD | Not started | - |
