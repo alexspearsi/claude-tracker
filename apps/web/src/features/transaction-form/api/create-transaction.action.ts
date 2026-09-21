@@ -21,8 +21,19 @@ export async function createTransactionAction(input: unknown): Promise<Transacti
     return { error: 'Сессия истекла, войдите заново' };
   }
 
+  // Пустое описание не должно уходить на api пустой строкой — иначе в базе окажется
+  // не null, а пустое значение, и строка таблицы вместо прочерка покажет пустоту.
+  const trimmedDescription = parsed.data.description?.trim();
+  const payload = {
+    amount: parsed.data.amount,
+    type: parsed.data.type,
+    categoryId: parsed.data.categoryId,
+    date: parsed.data.date,
+    ...(trimmedDescription ? { description: trimmedDescription } : {}),
+  };
+
   try {
-    await createTransaction(session.accessToken, parsed.data);
+    await createTransaction(session.accessToken, payload);
   } catch (error) {
     const fieldErrors = extractFieldErrors(error);
     if (fieldErrors) {
