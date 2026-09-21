@@ -1,3 +1,9 @@
+'use client';
+
+import { useState } from 'react';
+import type { Category } from '@expense/shared';
+import { TransactionForm } from '@/features/transaction-form/ui/transaction-form';
+import { Button } from '@/shared/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
 import { PaginationNav } from '@/shared/ui/pagination-nav';
 import { totalPages } from '@/shared/lib/pagination';
@@ -10,11 +16,13 @@ interface ExpensesListProps {
   rows: ExpenseRowModel[];
   total: number;
   page: number;
+  categories: Category[];
 }
 
-/** Карточка со списком транзакций и пагинацией — чистое представление, загрузку
- *  данных и обработку 401 делает вызывающий view. */
-export function ExpensesList({ rows, total, page }: ExpensesListProps) {
+/** Карточка со списком транзакций, пагинацией и точкой входа добавления —
+ *  вторая точка входа в общую TransactionForm (TXN-05, D-02). */
+export function ExpensesList({ rows, total, page, categories }: ExpensesListProps) {
+  const [isFormOpen, setFormOpen] = useState(false);
   const pages = totalPages(total);
   const isOutOfRange = rows.length === 0 && total > 0;
 
@@ -22,6 +30,7 @@ export function ExpensesList({ rows, total, page }: ExpensesListProps) {
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Транзакции</CardTitle>
+        <Button onClick={() => setFormOpen(true)}>Добавить транзакцию</Button>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         {rows.length === 0 ? (
@@ -36,6 +45,7 @@ export function ExpensesList({ rows, total, page }: ExpensesListProps) {
             <EmptyState
               title="Пока нет транзакций"
               description="Добавьте первую транзакцию, чтобы увидеть её здесь"
+              action={<Button onClick={() => setFormOpen(true)}>Добавить транзакцию</Button>}
             />
           )
         ) : (
@@ -45,6 +55,18 @@ export function ExpensesList({ rows, total, page }: ExpensesListProps) {
           </>
         )}
       </CardContent>
+
+      {isFormOpen && (
+        <TransactionForm
+          categories={categories}
+          open
+          onOpenChange={(next) => {
+            if (!next) {
+              setFormOpen(false);
+            }
+          }}
+        />
+      )}
     </Card>
   );
 }

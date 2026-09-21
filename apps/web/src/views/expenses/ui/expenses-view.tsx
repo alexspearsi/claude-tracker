@@ -27,7 +27,7 @@ export async function ExpensesView({ page }: ExpensesViewProps) {
       {result.status === 'error' ? (
         <p className="text-sm text-destructive">Не удалось загрузить транзакции: {result.message}</p>
       ) : (
-        <ExpensesList rows={result.rows} total={result.total} page={page} />
+        <ExpensesList rows={result.rows} total={result.total} page={page} categories={result.categories} />
       )}
     </main>
   );
