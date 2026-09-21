@@ -159,32 +159,53 @@
 
 ## Связать фронт с реальными данными
 
-Категории уже подключены к api — `/categories` работает как полноценный
-CRUD, и это готовый образец для следующего экрана. Незаполненной остаётся
-только `/expenses` (фаза 2). Рецепт подключения:
+Категории (`/categories`) и транзакции (`/expenses`, `/dashboard`) уже подключены к api —
+оба среза работают как готовые образцы для следующего экрана: категории — образец формы в
+`Dialog` без списка с пагинацией/фильтрами, транзакции — образец списка с пагинацией,
+фильтрами через URL и общей формой на двух экранах сразу. Рецепт подключения (по образцу
+транзакций, где он полнее):
 
-1. Данные читаются в Server Component (`views/<экран>/ui/*.tsx` или прямо в
-   `app/.../page.tsx`, если экран простой) через `apiFetch` с access-токеном
-   из `getSession()` — как в auth-экшенах, но `GET` без формы. Образец:
-   `views/categories/ui/categories-view.tsx`.
-2. Мутации (создание/правка/удаление) — Server Actions в `features/`, по
-   образцу `features/auth/api/*.action.ts`, только без `setSession`/`redirect`
-   в конце: вместо этого `revalidatePath`, чтобы Server Component
-   перечитал список. Ревалидировать нужно все затронутые пути сразу, а не
-   только текущий экран — готовый список путей держи рядом с фичей (образец:
-   `CATEGORY_AFFECTED_PATHS` в `features/category-form/model/affected-paths.ts`).
-   Образец экшена: `features/category-form/api/create-category.action.ts`.
-3. Список категорий для формы транзакции — переиспользуй тип `Category` из
-   `@expense/shared`, не создавай параллельный.
-4. Ошибки мутаций на DTO-роутах (категории, транзакции) разбирай через
-   `extractFieldErrors` (`shared/api/error-message.ts`) **до** фолбэка на
-   `apiErrorMessage` — иначе 400 с объектным `error.message` уходит в общее
-   сообщение о недоступности сервиса вместо ошибки конкретного поля.
-   Образец: `create-category.action.ts` + `features/category-form/ui/category-form.tsx`.
-5. Клиентскую границу опускай до виджета, а вью оставляй серверным
-   компонентом: `widgets/category-list/ui/category-list.tsx` владеет
-   состоянием `Dialog`/`AlertDialog`, а `views/categories/ui/categories-view.tsx`
-   остаётся без `'use client'`.
+1. **entity-api с токеном параметром.** Функции в `entities/<сущность>/api/*.ts`
+   (`get-transactions.ts`, `create-transaction.ts` и т.д.) принимают `accessToken` явным
+   параметром, а не читают сессию сами — entity не может импортировать `entities/session`
+   (кросс-импорт между entities запрещён). Токен достаёт вызывающий Server Action/Server
+   Component через `getSession()`.
+2. **Server Action со списком путей ревалидации.** Мутации — в `features/`, по образцу
+   `features/auth/api/*.action.ts`, только без `setSession`/`redirect` в конце: вместо этого
+   `revalidatePath` по каждому пути из готового списка рядом с фичей (образцы:
+   `CATEGORY_AFFECTED_PATHS` в `features/category-form/model/affected-paths.ts`,
+   `TRANSACTION_AFFECTED_PATHS` в `features/transaction-form/model/affected-paths.ts` —
+   `[ROUTES.dashboard, ROUTES.expenses]`, потому что транзакция видна на обеих поверхностях).
+   Ошибки на DTO-роутах разбирай через `extractFieldErrors` (`shared/api/error-message.ts`)
+   **до** фолбэка на `apiErrorMessage` — иначе 400 с объектным `error.message` уходит в общее
+   сообщение о недоступности сервиса вместо ошибки конкретного поля. Образцы:
+   `create-category.action.ts`, `create-transaction.action.ts`/`update-transaction.action.ts`.
+3. **Виджет со склейкой данных двух entity через `Map`.** Ни одна entity не видит другую
+   напрямую (`entities/transaction` не импортирует `entities/category`) — если в строке
+   списка нужны и транзакция, и имя/цвет её категории, склейку делает `widget`: он запрашивает
+   обе сущности и строит `Map<categoryId, Category>`, а в компонент передаёт уже готовую
+   строку (`ExpenseRowModel` в `widgets/expenses-list/model/types.ts` — образец). Компонент
+   формы (категории для `Select`) получает список категорий пропом сверху, а не сам его
+   запрашивает.
+4. **Серверный вью, читающий строку запроса.** `views/<экран>/ui/*.tsx` остаётся серверным
+   компонентом без `'use client'`, разбирает `searchParams` (номер страницы через `parsePage`,
+   фильтры — по образцу `parseTransactionFilters` в `widgets/expenses-list/model/filters.ts`,
+   где невалидное значение параметра трактуется как «фильтр не задан», а не как ошибка) и
+   передаёт готовые пропы вниз. Клиентскую границу опускай до виджета:
+   `widgets/expenses-list/ui/expenses-list.tsx`/`widgets/category-list/ui/category-list.tsx`
+   владеют состоянием открытых `Dialog`/`AlertDialog` и (для транзакций) панелью фильтров —
+   у последней нет собственного `useState`: она только читает проп `filters` и на любое
+   изменение пушет новый URL (`router.push(filtersHref(...))`), номер страницы туда не
+   попадает, чтобы смена фильтра всегда возвращала на первую страницу.
+5. **Ручная синхронизация локальной Zod-схемы с DTO — обязательный шаг.** У категорий
+   правила задокументированы и в DTO на api, и в `packages/shared/src/schemas/category.ts`
+   (используется под тип ответа на фронте). У транзакций общей Zod-схемы в `@expense/shared`
+   нет вовсе — `features/transaction-form/model/transaction-form-schema.ts` вручную зеркалит
+   `apps/api/src/modules/transactions/dto/transaction-validation.ts` (лимиты, паттерн суммы,
+   максимум описания). При правке `transaction-validation.ts` (новое поле, изменённый лимит,
+   другой паттерн) **обязательно** правь и `transaction-form-schema.ts` — `npm run typecheck`
+   расхождение значений (не форму, а именно значения регулярок/лимитов) не поймает, оба файла
+   типизированы независимо и компилируются одинаково успешно при разных правилах внутри.
 
 ---
 
