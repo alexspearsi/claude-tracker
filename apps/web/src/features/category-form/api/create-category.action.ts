@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { createCategorySchema } from '@expense/shared';
 import { getSession } from '@/entities/session/api/session';
 import { createCategory } from '@/entities/category/api/create-category';
-import { apiErrorMessage } from '@/shared/api/error-message';
+import { apiErrorMessage, extractFieldErrors } from '@/shared/api/error-message';
 import { CATEGORY_AFFECTED_PATHS } from '@/features/category-form/model/affected-paths';
 import type { CategoryActionState } from '@/features/category-form/model/types';
 
@@ -23,6 +23,10 @@ export async function createCategoryAction(input: unknown): Promise<CategoryActi
   try {
     await createCategory(session.accessToken, parsed.data);
   } catch (error) {
+    const fieldErrors = extractFieldErrors(error);
+    if (fieldErrors) {
+      return { error: 'Проверьте правильность заполнения полей', fieldErrors };
+    }
     return { error: apiErrorMessage(error) };
   }
 

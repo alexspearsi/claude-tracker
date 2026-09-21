@@ -46,6 +46,16 @@ export function CategoryForm({ category, open, onOpenChange }: CategoryFormProps
     // CategoryActionState — не дискриминированный по общему полю union, поэтому
     // сужаем через 'in', а не через result?.error (последнее не типизируется).
     if (result && 'error' in result) {
+      // Per-field ошибки DTO-валидации (400, grouped) — под конкретным полем,
+      // без тоста и без закрытия модалки; поля, которых нет в форме, молча пропускаем.
+      if (result.fieldErrors) {
+        for (const [field, message] of Object.entries(result.fieldErrors)) {
+          if (field === 'name' || field === 'color') {
+            form.setError(field, { message });
+          }
+        }
+        return;
+      }
       toast.error(result.error);
       return;
     }
