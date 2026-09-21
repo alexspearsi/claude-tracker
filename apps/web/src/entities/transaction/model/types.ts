@@ -18,3 +18,15 @@ export interface TransactionList {
   items: Transaction[];
   total: number;
 }
+
+/** Тело POST /transactions — зеркало CreateTransactionDto. */
+export interface CreateTransactionInput {
+  amount: string;
+  type: TransactionType;
+  categoryId: string;
+  date: string; // полный ISO-таймстамп, полдень UTC — см. transaction-form.tsx
+  description?: string | null;
+}
+
+/** Тело PATCH /transactions/:id — все поля необязательны. */
+export type UpdateTransactionInput = Partial<CreateTransactionInput>;

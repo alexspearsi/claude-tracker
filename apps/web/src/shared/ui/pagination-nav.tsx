@@ -6,6 +6,8 @@ interface PaginationNavProps {
   basePath: string;
   page: number;
   pages: number;
+  /** Активные фильтры (см. filtersToParams) — без них переход по страницам их бы терял. */
+  params?: URLSearchParams;
 }
 
 const linkClassName =
@@ -17,14 +19,14 @@ const disabledClassName = 'pointer-events-none opacity-50';
  * известную на этой машине проблему — Chrome обнуляет фон у <button> (см. память
  * chrome-overrides-button-colors), <a> она не касается.
  */
-export function PaginationNav({ basePath, page, pages }: PaginationNavProps) {
+export function PaginationNav({ basePath, page, pages, params }: PaginationNavProps) {
   const hasPrev = page > 1;
   const hasNext = page < pages;
 
   return (
     <nav className="flex items-center justify-between gap-4">
       {hasPrev ? (
-        <Link href={pageHref(basePath, page - 1)} className={linkClassName}>
+        <Link href={pageHref(basePath, page - 1, params)} className={linkClassName}>
           Назад
         </Link>
       ) : (
@@ -36,7 +38,7 @@ export function PaginationNav({ basePath, page, pages }: PaginationNavProps) {
       </span>
 
       {hasNext ? (
-        <Link href={pageHref(basePath, page + 1)} className={linkClassName}>
+        <Link href={pageHref(basePath, page + 1, params)} className={linkClassName}>
           Вперёд
         </Link>
       ) : (

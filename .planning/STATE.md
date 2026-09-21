@@ -1,19 +1,20 @@
 ---
 gsd_state_version: "1.0"
-current_phase: 2
-current_phase_name: Транзакции
+current_phase: 3
+current_phase_name: Сводка и баланс
+current_plan: 0
 status: planning
-stopped_at: Phase 1 complete, ready to plan Phase 2
-last_updated: "2026-09-21T07:41:29.368Z"
+stopped_at: Completed 02-05-PLAN.md
+last_updated: "2026-09-21T16:08:22.000Z"
 last_activity: 2026-09-21
-last_activity_desc: Phase 1 complete, transitioned to Phase 2
-state_head: a464be85bec6bf453734a49c62b66b1fe02ae4ec
+last_activity_desc: Phase 2 complete, transitioned to Phase 3
+state_head: 7c25187
 progress:
   total_phases: 3
-  completed_phases: 1
-  total_plans: 3
-  completed_plans: 3
-  percent: 33
+  completed_phases: 2
+  total_plans: 8
+  completed_plans: 8
+  percent: 67
 ---
 
 # Project State
@@ -28,18 +29,19 @@ See: .planning/PROJECT.md (updated 2026-09-20)
 
 ## Current Position
 
-Phase: 2 — Транзакции
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-09-21 — Phase 1 complete, transitioned to Phase 2
+Phase: 3 (Сводка и баланс) — PLANNING
+Current Plan: TBD (план фазы 3 ещё не создан)
+Total Plans in Phase: TBD
+Status: Planning
+Last activity: 2026-09-21 — Plan 02-05 (документация + приёмка TXN-01..TXN-06) executed, Phase 2 complete
 
-Progress: [███░░░░░░░] 33%
+Progress: [██████░░░░] 67%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 3
+- Total plans completed: 8
 - Average duration: - min
 - Total execution time: 0 hours
 
@@ -48,6 +50,7 @@ Progress: [███░░░░░░░] 33%
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 1 | 3 | - | - |
+| 2 | 5 | - | - |
 
 **Recent Trend:**
 
@@ -55,6 +58,12 @@ Progress: [███░░░░░░░] 33%
 - Trend: -
 
 *Updated after each plan completion*
+**Per-Plan Metrics:**
+
+| Plan | Duration | Tasks | Files |
+|------|----------|-------|-------|
+| Phase 02-tranzaktsii P04 | 35min | 2 tasks | 9 files |
+| Phase 02-tranzaktsii P05 | 50min | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -69,6 +78,9 @@ Recent decisions affecting current work:
   `/expenses` не разбивается на разные фазы или планы — единая vertical-slice фича.
 - Roadmap: Сводка/баланс (Phase 3) поставлена последней — зависит от того, что транзакции уже
   можно создавать через UI, иначе показывать нечего.
+- [Phase 2]: Фильтры /expenses: parseTransactionFilters отбрасывает испорченный параметр в undefined (тот же принцип, что parsePage), а не редиректит/ошибается
+- [Phase 2]: Фильтры периода на /expenses строятся календарной датой yyyy-MM-dd (без времени), в отличие от noon-UTC таймстампа полей формы создания/редактирования
+- [Phase 2]: Фаза 2 завершена — все 6 требований TXN-01..TXN-06 подтверждены ручной браузерной UAT, документация (architecture.md, api.md, dev-guide.md, CLAUDE.md) актуализирована под построенный срез транзакций, npm run build проходит кодом 0
 
 ### Pending Todos
 
@@ -95,6 +107,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-09-20T19:42:29.942Z
-Stopped at: Phase 1 complete, ready to plan Phase 2
-Resume file: .planning/phases/01-kategorii/01-UI-SPEC.md
+Last session: 2026-09-21T16:08:22.000Z
+Stopped at: Completed 02-05-PLAN.md
+Resume file: None
