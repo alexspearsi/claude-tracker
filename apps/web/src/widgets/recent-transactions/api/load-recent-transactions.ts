@@ -1,4 +1,5 @@
 import 'server-only';
+import type { Category } from '@expense/shared';
 import { getCategories } from '@/entities/category/api/get-categories';
 import { getTransactions } from '@/entities/transaction/api/get-transactions';
 import { ApiError } from '@/shared/api/api-client';
@@ -7,7 +8,7 @@ import { PAGE_SIZE } from '@/shared/lib/pagination';
 import type { TransactionRowModel } from '@/widgets/recent-transactions/model/types';
 
 export type LoadRecentTransactionsResult =
-  | { status: 'ok'; rows: TransactionRowModel[]; total: number }
+  | { status: 'ok'; rows: TransactionRowModel[]; total: number; categories: Category[] }
   | { status: 'unauthorized' }
   | { status: 'error'; message: string };
 
@@ -57,5 +58,5 @@ export async function loadRecentTransactions(
     };
   });
 
-  return { status: 'ok', rows, total: txResult.value.total };
+  return { status: 'ok', rows, total: txResult.value.total, categories: catResult.value };
 }

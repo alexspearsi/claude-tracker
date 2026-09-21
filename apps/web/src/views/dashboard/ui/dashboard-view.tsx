@@ -3,6 +3,7 @@ import { getSession } from '@/entities/session/api/session';
 import { getCurrentUser } from '@/entities/user/api/get-current-user';
 import { userDisplayName } from '@/entities/user/lib/display-name';
 import { ROUTES } from '@/shared/config/routes';
+import { QuickAddTransaction } from '@/widgets/quick-add-transaction/ui/quick-add-transaction';
 import { loadRecentTransactions } from '@/widgets/recent-transactions/api/load-recent-transactions';
 import { RecentTransactions } from '@/widgets/recent-transactions/ui/recent-transactions';
 
@@ -45,6 +46,7 @@ export async function DashboardView({ page }: DashboardViewProps) {
           total={result.total}
           page={page}
           basePath={ROUTES.dashboard}
+          headerAction={<QuickAddTransaction categories={result.categories} />}
         />
       )}
     </main>
