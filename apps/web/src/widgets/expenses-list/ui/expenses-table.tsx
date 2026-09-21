@@ -15,9 +15,10 @@ import type { ExpenseRowModel } from '@/widgets/expenses-list/model/types';
 interface ExpensesTableProps {
   rows: ExpenseRowModel[];
   onEdit: (row: ExpenseRowModel) => void;
+  onDelete: (row: ExpenseRowModel) => void;
 }
 
-export function ExpensesTable({ rows, onEdit }: ExpensesTableProps) {
+export function ExpensesTable({ rows, onEdit, onDelete }: ExpensesTableProps) {
   return (
     <Table>
       <TableHeader>
@@ -51,6 +52,14 @@ export function ExpensesTable({ rows, onEdit }: ExpensesTableProps) {
               <div className="flex justify-end gap-2">
                 <Button variant="ghost" size="sm" onClick={() => onEdit(row)}>
                   Редактировать
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-destructive"
+                  onClick={() => onDelete(row)}
+                >
+                  Удалить
                 </Button>
               </div>
             </TableCell>

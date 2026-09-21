@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import type { Category } from '@expense/shared';
+import { TransactionDeleteDialog } from '@/features/transaction-form/ui/transaction-delete-dialog';
 import { TransactionForm } from '@/features/transaction-form/ui/transaction-form';
 import { Button } from '@/shared/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
@@ -19,11 +20,13 @@ interface ExpensesListProps {
   categories: Category[];
 }
 
-/** Карточка со списком транзакций, пагинацией и точками входа добавления/редактирования —
- *  вторая точка входа в общую TransactionForm (TXN-05, D-02, TXN-02). */
+/** Карточка со списком транзакций, пагинацией и точками входа добавления/редактирования/удаления —
+ *  вторая точка входа в общую TransactionForm (TXN-05, D-02, TXN-02) и в диалог удаления (TXN-03). */
 export function ExpensesList({ rows, total, page, categories }: ExpensesListProps) {
   // 'create' — новая транзакция, строка ExpenseRowModel — редактирование, null — форма закрыта.
   const [formTarget, setFormTarget] = useState<ExpenseRowModel | 'create' | null>(null);
+  // Независимо от formTarget — форма и подтверждение удаления открываются раздельно.
+  const [deleteTarget, setDeleteTarget] = useState<ExpenseRowModel | null>(null);
   const pages = totalPages(total);
   const isOutOfRange = rows.length === 0 && total > 0;
 
@@ -51,7 +54,7 @@ export function ExpensesList({ rows, total, page, categories }: ExpensesListProp
           )
         ) : (
           <>
-            <ExpensesTable rows={rows} onEdit={setFormTarget} />
+            <ExpensesTable rows={rows} onEdit={setFormTarget} onDelete={setDeleteTarget} />
             <PaginationNav basePath={ROUTES.expenses} page={page} pages={pages} />
           </>
         )}
@@ -66,6 +69,19 @@ export function ExpensesList({ rows, total, page, categories }: ExpensesListProp
           onOpenChange={(next) => {
             if (!next) {
               setFormTarget(null);
+            }
+          }}
+        />
+      )}
+
+      {deleteTarget !== null && (
+        <TransactionDeleteDialog
+          key={deleteTarget.id}
+          transaction={deleteTarget}
+          open
+          onOpenChange={(next) => {
+            if (!next) {
+              setDeleteTarget(null);
             }
           }}
         />
