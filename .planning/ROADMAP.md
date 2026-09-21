@@ -20,7 +20,7 @@
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Категории** - Полноценный CRUD категорий на `/categories` с блокировкой удаления занятых категорий
+- [x] **Phase 1: Категории** - Полноценный CRUD категорий на `/categories` с блокировкой удаления занятых категорий (completed 2026-09-21)
 - [ ] **Phase 2: Транзакции** - Полноценный CRUD транзакций через общую форму на `/dashboard` и `/expenses`, с фильтрами
 - [ ] **Phase 3: Сводка и баланс** - Баланс/доходы/расходы за месяц и разбивка по категориям на дашборде
 
@@ -43,7 +43,7 @@ Decimal phases appear between their surrounding integers in numeric order.
      сообщение о блокировке (а не сырой текст ошибки API), и удаление не происходит.
   5. Страница `/categories` показывает полный список категорий пользователя как рабочий CRUD,
      а не заглушку.
-**Plans:** 3/3 plans executed
+**Plans:** 3/3 plans complete
 
 Plans:
 **Wave 1**
@@ -106,6 +106,6 @@ Phases execute in numeric order: 1 → 2 → 3
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Категории | 3/3 | In Progress|  |
+| 1. Категории | 3/3 | Complete    | 2026-09-21 |
 | 2. Транзакции | 0/TBD | Not started | - |
 | 3. Сводка и баланс | 0/TBD | Not started | - |
