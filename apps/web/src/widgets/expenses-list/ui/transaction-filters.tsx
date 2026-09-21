@@ -96,6 +96,11 @@ export function TransactionFiltersPanel({ filters, categories }: TransactionFilt
       </Popover>
 
       <Select
+        // key вместо просто value: Radix Select не сбрасывает отображаемое значение при
+        // переходе controlled value с реальной строки на undefined (переключение
+        // controlled/uncontrolled на лету не поддерживается) — без key триггер продолжал бы
+        // показывать последний выбранный пункт вместо плейсхолдера «Тип» после сброса фильтра.
+        key={`type-${filters.type ?? 'all'}`}
         value={filters.type}
         onValueChange={(value) =>
           push({
@@ -115,6 +120,7 @@ export function TransactionFiltersPanel({ filters, categories }: TransactionFilt
       </Select>
 
       <Select
+        key={`category-${filters.categoryId ?? 'all'}`}
         value={filters.categoryId}
         onValueChange={(value) =>
           push({
