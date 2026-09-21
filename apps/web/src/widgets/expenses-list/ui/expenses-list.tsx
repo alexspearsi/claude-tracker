@@ -11,24 +11,30 @@ import { totalPages } from '@/shared/lib/pagination';
 import { ROUTES } from '@/shared/config/routes';
 import { EmptyState } from '@/widgets/expenses-list/ui/empty-state';
 import { ExpensesTable } from '@/widgets/expenses-list/ui/expenses-table';
+import { TransactionFiltersPanel } from '@/widgets/expenses-list/ui/transaction-filters';
+import { filtersToParams, hasActiveFilters, type TransactionFilters } from '@/widgets/expenses-list/model/filters';
 import type { ExpenseRowModel } from '@/widgets/expenses-list/model/types';
 
 interface ExpensesListProps {
   rows: ExpenseRowModel[];
   total: number;
   page: number;
+  filters: TransactionFilters;
   categories: Category[];
 }
 
-/** Карточка со списком транзакций, пагинацией и точками входа добавления/редактирования/удаления —
- *  вторая точка входа в общую TransactionForm (TXN-05, D-02, TXN-02) и в диалог удаления (TXN-03). */
-export function ExpensesList({ rows, total, page, categories }: ExpensesListProps) {
+/** Карточка со списком транзакций, панелью фильтров, пагинацией и точками входа
+ *  добавления/редактирования/удаления — вторая точка входа в общую TransactionForm
+ *  (TXN-05, D-02, TXN-02), в диалог удаления (TXN-03) и в панель фильтров (TXN-06, D-04). */
+export function ExpensesList({ rows, total, page, filters, categories }: ExpensesListProps) {
   // 'create' — новая транзакция, строка ExpenseRowModel — редактирование, null — форма закрыта.
   const [formTarget, setFormTarget] = useState<ExpenseRowModel | 'create' | null>(null);
   // Независимо от formTarget — форма и подтверждение удаления открываются раздельно.
   const [deleteTarget, setDeleteTarget] = useState<ExpenseRowModel | null>(null);
   const pages = totalPages(total);
   const isOutOfRange = rows.length === 0 && total > 0;
+  const isFiltered = hasActiveFilters(filters);
+  const filterParams = filtersToParams(filters);
 
   return (
     <Card>
@@ -37,6 +43,10 @@ export function ExpensesList({ rows, total, page, categories }: ExpensesListProp
         <Button onClick={() => setFormTarget('create')}>Добавить транзакцию</Button>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
+        {/* Панель рендерится всегда, в том числе при нулевой выдаче — иначе фильтр,
+            из-за которого список опустел, нечем было бы снять (D-04). */}
+        <TransactionFiltersPanel filters={filters} categories={categories} />
+
         {rows.length === 0 ? (
           isOutOfRange ? (
             <EmptyState
@@ -45,6 +55,8 @@ export function ExpensesList({ rows, total, page, categories }: ExpensesListProp
               backHref={ROUTES.expenses}
               backLabel="К первой странице"
             />
+          ) : isFiltered ? (
+            <EmptyState title="Ничего не найдено" description="Попробуйте изменить период, тип или категорию" />
           ) : (
             <EmptyState
               title="Пока нет транзакций"
@@ -55,7 +67,7 @@ export function ExpensesList({ rows, total, page, categories }: ExpensesListProp
         ) : (
           <>
             <ExpensesTable rows={rows} onEdit={setFormTarget} onDelete={setDeleteTarget} />
-            <PaginationNav basePath={ROUTES.expenses} page={page} pages={pages} />
+            <PaginationNav basePath={ROUTES.expenses} page={page} pages={pages} params={filterParams} />
           </>
         )}
       </CardContent>

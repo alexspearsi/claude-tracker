@@ -2,17 +2,18 @@
 gsd_state_version: "1.0"
 current_phase: 2
 current_phase_name: Транзакции
+current_plan: 5
 status: executing
-stopped_at: Phase 2 UI-SPEC approved
-last_updated: "2026-09-21T14:06:33.223Z"
+stopped_at: Completed 02-04-PLAN.md
+last_updated: "2026-09-21T15:43:37.052Z"
 last_activity: 2026-09-21
 last_activity_desc: Phase 1 complete, transitioned to Phase 2
-state_head: cad17d16beb75924bf5acfe742dea68dda4a4913
+state_head: 7ec9388aaeea8462725f5b988456398875586605
 progress:
   total_phases: 3
   completed_phases: 1
   total_plans: 8
-  completed_plans: 3
+  completed_plans: 7
   percent: 33
 ---
 
@@ -28,10 +29,11 @@ See: .planning/PROJECT.md (updated 2026-09-20)
 
 ## Current Position
 
-Phase: 2 (Транзакции) — READY TO EXECUTE
-Plan: Not started
-Status: Ready to execute
-Last activity: 2026-09-21 — Phase 1 complete, transitioned to Phase 2
+Phase: 2 (Транзакции) — EXECUTING
+Current Plan: 5
+Total Plans in Phase: 5
+Status: Executing
+Last activity: 2026-09-21 — Plan 02-04 (фильтры) executed
 
 Progress: [███░░░░░░░] 33%
 
@@ -55,6 +57,11 @@ Progress: [███░░░░░░░] 33%
 - Trend: -
 
 *Updated after each plan completion*
+**Per-Plan Metrics:**
+
+| Plan | Duration | Tasks | Files |
+|------|----------|-------|-------|
+| Phase 02-tranzaktsii P04 | 35min | 2 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -69,6 +76,8 @@ Recent decisions affecting current work:
   `/expenses` не разбивается на разные фазы или планы — единая vertical-slice фича.
 - Roadmap: Сводка/баланс (Phase 3) поставлена последней — зависит от того, что транзакции уже
   можно создавать через UI, иначе показывать нечего.
+- [Phase 2]: Фильтры /expenses: parseTransactionFilters отбрасывает испорченный параметр в undefined (тот же принцип, что parsePage), а не редиректит/ошибается
+- [Phase 2]: Фильтры периода на /expenses строятся календарной датой yyyy-MM-dd (без времени), в отличие от noon-UTC таймстампа полей формы создания/редактирования
 
 ### Pending Todos
 
@@ -95,6 +104,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-09-21T13:39:39.123Z
-Stopped at: Phase 2 UI-SPEC approved
-Resume file: .planning/phases/02-tranzaktsii/02-UI-SPEC.md
+Last session: 2026-09-21T15:43:37.004Z
+Stopped at: Completed 02-04-PLAN.md
+Resume file: None

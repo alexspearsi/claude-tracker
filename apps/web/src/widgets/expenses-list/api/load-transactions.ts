@@ -5,6 +5,7 @@ import { getTransactions } from '@/entities/transaction/api/get-transactions';
 import { ApiError } from '@/shared/api/api-client';
 import { apiErrorMessage } from '@/shared/api/error-message';
 import { PAGE_SIZE } from '@/shared/lib/pagination';
+import type { TransactionFilters } from '@/widgets/expenses-list/model/filters';
 import type { ExpenseRowModel } from '@/widgets/expenses-list/model/types';
 
 export type LoadTransactionsResult =
@@ -19,10 +20,14 @@ export type LoadTransactionsResult =
  */
 export async function loadTransactions(
   accessToken: string,
-  { page }: { page: number },
+  { page, filters }: { page: number; filters: TransactionFilters },
 ): Promise<LoadTransactionsResult> {
   const [txResult, catResult] = await Promise.allSettled([
-    getTransactions(accessToken, { limit: PAGE_SIZE, offset: (page - 1) * PAGE_SIZE }),
+    getTransactions(accessToken, {
+      limit: PAGE_SIZE,
+      offset: (page - 1) * PAGE_SIZE,
+      ...filters,
+    }),
     getCategories(accessToken),
   ]);
 
