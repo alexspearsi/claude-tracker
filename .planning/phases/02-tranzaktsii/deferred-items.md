@@ -2,23 +2,23 @@
 
 Обнаружено, но вне скоупа текущего плана (SCOPE BOUNDARY) — фиксируется, не чинится.
 
-## 02-01: `npm run typecheck` для apps/api не проходит в этом worktree
+## 02-01: `npm run typecheck` для apps/api не проходил в этом worktree — РЕШЕНО локально
 
-**Что происходит:** `apps/api` не собирает Prisma-клиент — `prisma:generate` падает с
+**Что происходило:** `apps/api` не собирал Prisma-клиент — `prisma:generate` падал с
 `PrismaConfigEnvError: Cannot resolve environment variable: DATABASE_URL`, а без сгенерированного
-клиента `tsc --noEmit` в `apps/api` валится на импортах `../generated/prisma/*` и на
-`PrismaService`-делегатах (`Property 'category' does not exist on type 'PrismaService'` и т.п.).
+клиента `tsc --noEmit` в `apps/api` валился на импортах `../generated/prisma/*` и на
+`PrismaService`-делегатах. Причина — этот git worktree создан изолированно и не унаследовал
+`apps/api/.env` (gitignored, не копируется harness'ом при создании worktree).
 
-**Почему вне скоупа:** план 02-01 не трогает ни одного файла в `apps/api` (весь `files_modified`
-— `apps/web` + `package-lock.json`). Причина — этот git worktree создан изолированно и не
-унаследовал `apps/api/.env` (`DATABASE_URL`), который есть в основном репозитории, но
-gitignored и потому не копируется harness'ом при создании worktree. Это дефект окружения
-worktree, а не код, изменённый этим планом.
+**Почему изначально вне скоупа:** план 02-01 не трогает ни одного файла в `apps/api`.
 
-**Проверено:** `npm run typecheck --workspace=apps/web` (единственный пакет, который правит этот
-план) проходит кодом 0, без единой ошибки — гейт плана выполнен для затронутого кода.
+**Разрешение (для верификации Задачи 2 — сквозной human-check):** локально в этом worktree
+создан `apps/api/.env` из `.env.example` со свежесгенерированными dev-секретами (не
+production, только для локальной проверки) и `apps/web/.env.local` из своего `.env.example`.
+БД-контейнер `expense-tracker-db` уже был поднят (общий docker-контейнер, не per-worktree) и
+здоров на порту 5433, схема уже смигрирована — `prisma migrate status` подтвердил
+"Database schema is up to date". Полный `npm run typecheck` (shared → api → web) теперь
+проходит кодом 0.
 
-**Что делать:** при мёрже в основную ветку/при работе не в изолированном worktree
-`npm run typecheck` полного монорепо должен пройти как обычно (там `.env` есть). Если этот
-worktree переживёт мёрж и с ним продолжат работать — скопировать `apps/api/.env` из основного
-репозитория вручную (не через агента: файл содержит секреты).
+**Файлы `.env`/`.env.local` не коммитятся** — оба в `.gitignore`, создавались только для
+локального ручного прогона проверки этого плана.
