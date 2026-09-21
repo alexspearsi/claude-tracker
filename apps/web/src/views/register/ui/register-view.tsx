@@ -9,25 +9,29 @@ import {
   CardHeader,
   CardTitle,
 } from '@/shared/ui/card';
+import { Logo } from '@/shared/ui/logo';
 
 export function RegisterView() {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-2xl">Регистрация</CardTitle>
-        <CardDescription>Создайте аккаунт трекера расходов</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <RegisterForm />
-      </CardContent>
-      <CardFooter className="justify-center text-sm text-muted-foreground">
-        <span>
-          Уже есть аккаунт?{' '}
-          <Link href={ROUTES.login} className="text-primary underline-offset-4 hover:underline">
-            Войти
-          </Link>
-        </span>
-      </CardFooter>
-    </Card>
+    <div className="flex flex-col items-center gap-7">
+      <Logo />
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle>Регистрация</CardTitle>
+          <CardDescription>Создайте аккаунт трекера расходов</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <RegisterForm />
+        </CardContent>
+        <CardFooter className="justify-center text-sm font-semibold text-muted-foreground">
+          <span>
+            Уже есть аккаунт?{' '}
+            <Link href={ROUTES.login} className="text-primary underline-offset-4 hover:underline">
+              Войти
+            </Link>
+          </span>
+        </CardFooter>
+      </Card>
+    </div>
   );
 }

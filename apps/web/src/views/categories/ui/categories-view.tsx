@@ -28,13 +28,13 @@ export async function CategoriesView() {
   }
 
   return (
-    <main className="mx-auto flex max-w-4xl flex-col gap-6 p-6">
-      <h1 className="text-2xl font-semibold">Категории</h1>
+    <>
+      <h1 className="text-[40px] leading-[1.05] font-extrabold tracking-tight">Категории</h1>
       {loadError ? (
         <p className="text-sm text-destructive">Не удалось загрузить категории: {loadError}</p>
       ) : (
         <CategoryList categories={categories} />
       )}
-    </main>
+    </>
   );
 }

@@ -59,7 +59,7 @@ export function TransactionFiltersPanel({ filters, categories }: TransactionFilt
     : 'Период';
 
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="lg-glass-soft flex flex-wrap items-center gap-2 rounded-full p-2">
       <Popover>
         <PopoverTrigger asChild>
           <Button variant="outline" className="font-normal">

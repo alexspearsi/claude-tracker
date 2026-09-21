@@ -11,8 +11,8 @@ interface PaginationNavProps {
 }
 
 const linkClassName =
-  'inline-flex h-8 items-center rounded-md border px-3 text-sm transition-colors hover:bg-accent hover:text-accent-foreground';
-const disabledClassName = 'pointer-events-none opacity-50';
+  'lg-glass-soft inline-flex h-11 items-center rounded-full px-5 text-sm font-semibold transition-colors hover:bg-white/70 dark:hover:bg-white/10';
+const disabledClassName = 'pointer-events-none opacity-40';
 
 /**
  * Ссылки, а не кнопки: верно для RSC (без клиентского состояния) и заодно обходит
@@ -33,7 +33,7 @@ export function PaginationNav({ basePath, page, pages, params }: PaginationNavPr
         <span className={cn(linkClassName, disabledClassName)}>Назад</span>
       )}
 
-      <span className="text-sm text-muted-foreground">
+      <span className="text-sm font-semibold text-muted-foreground">
         Страница {page} из {pages}
       </span>
 

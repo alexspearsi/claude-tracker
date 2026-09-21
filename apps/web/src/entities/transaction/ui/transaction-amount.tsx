@@ -13,8 +13,8 @@ export function TransactionAmount({ amount, type, className }: TransactionAmount
   return (
     <span
       className={cn(
-        'font-medium tabular-nums',
-        isExpense ? 'text-destructive' : 'text-emerald-600 dark:text-emerald-400',
+        'font-bold tabular-nums',
+        isExpense ? 'text-[var(--expense)]' : 'text-[var(--income)]',
         className,
       )}
     >
