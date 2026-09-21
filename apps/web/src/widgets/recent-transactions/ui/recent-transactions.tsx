@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
 import { totalPages } from '@/shared/lib/pagination';
+import { PaginationNav } from '@/shared/ui/pagination-nav';
 import { EmptyState } from '@/widgets/recent-transactions/ui/empty-state';
-import { PaginationNav } from '@/widgets/recent-transactions/ui/pagination-nav';
 import { TransactionsTable } from '@/widgets/recent-transactions/ui/transactions-table';
 import type { TransactionRowModel } from '@/widgets/recent-transactions/model/types';
 
