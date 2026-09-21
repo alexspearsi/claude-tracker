@@ -1,6 +1,7 @@
 import { CategoryDot } from '@/entities/category/ui/category-dot';
 import { TransactionAmount } from '@/entities/transaction/ui/transaction-amount';
 import { formatDate } from '@/shared/lib/format-date';
+import { Button } from '@/shared/ui/button';
 import {
   Table,
   TableBody,
@@ -13,9 +14,11 @@ import type { ExpenseRowModel } from '@/widgets/expenses-list/model/types';
 
 interface ExpensesTableProps {
   rows: ExpenseRowModel[];
+  onEdit: (row: ExpenseRowModel) => void;
+  onDelete: (row: ExpenseRowModel) => void;
 }
 
-export function ExpensesTable({ rows }: ExpensesTableProps) {
+export function ExpensesTable({ rows, onEdit, onDelete }: ExpensesTableProps) {
   return (
     <Table>
       <TableHeader>
@@ -45,7 +48,21 @@ export function ExpensesTable({ rows }: ExpensesTableProps) {
             <TableCell className="text-right">
               <TransactionAmount amount={row.amount} type={row.type} />
             </TableCell>
-            <TableCell />
+            <TableCell className="text-right">
+              <div className="flex justify-end gap-2">
+                <Button variant="ghost" size="sm" onClick={() => onEdit(row)}>
+                  Редактировать
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-destructive"
+                  onClick={() => onDelete(row)}
+                >
+                  Удалить
+                </Button>
+              </div>
+            </TableCell>
           </TableRow>
         ))}
       </TableBody>

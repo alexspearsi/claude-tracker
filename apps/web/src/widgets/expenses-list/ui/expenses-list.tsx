@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import type { Category } from '@expense/shared';
+import { TransactionDeleteDialog } from '@/features/transaction-form/ui/transaction-delete-dialog';
 import { TransactionForm } from '@/features/transaction-form/ui/transaction-form';
 import { Button } from '@/shared/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
@@ -19,10 +20,13 @@ interface ExpensesListProps {
   categories: Category[];
 }
 
-/** Карточка со списком транзакций, пагинацией и точкой входа добавления —
- *  вторая точка входа в общую TransactionForm (TXN-05, D-02). */
+/** Карточка со списком транзакций, пагинацией и точками входа добавления/редактирования/удаления —
+ *  вторая точка входа в общую TransactionForm (TXN-05, D-02, TXN-02) и в диалог удаления (TXN-03). */
 export function ExpensesList({ rows, total, page, categories }: ExpensesListProps) {
-  const [isFormOpen, setFormOpen] = useState(false);
+  // 'create' — новая транзакция, строка ExpenseRowModel — редактирование, null — форма закрыта.
+  const [formTarget, setFormTarget] = useState<ExpenseRowModel | 'create' | null>(null);
+  // Независимо от formTarget — форма и подтверждение удаления открываются раздельно.
+  const [deleteTarget, setDeleteTarget] = useState<ExpenseRowModel | null>(null);
   const pages = totalPages(total);
   const isOutOfRange = rows.length === 0 && total > 0;
 
@@ -30,7 +34,7 @@ export function ExpensesList({ rows, total, page, categories }: ExpensesListProp
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Транзакции</CardTitle>
-        <Button onClick={() => setFormOpen(true)}>Добавить транзакцию</Button>
+        <Button onClick={() => setFormTarget('create')}>Добавить транзакцию</Button>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         {rows.length === 0 ? (
@@ -45,24 +49,39 @@ export function ExpensesList({ rows, total, page, categories }: ExpensesListProp
             <EmptyState
               title="Пока нет транзакций"
               description="Добавьте первую транзакцию, чтобы увидеть её здесь"
-              action={<Button onClick={() => setFormOpen(true)}>Добавить транзакцию</Button>}
+              action={<Button onClick={() => setFormTarget('create')}>Добавить транзакцию</Button>}
             />
           )
         ) : (
           <>
-            <ExpensesTable rows={rows} />
+            <ExpensesTable rows={rows} onEdit={setFormTarget} onDelete={setDeleteTarget} />
             <PaginationNav basePath={ROUTES.expenses} page={page} pages={pages} />
           </>
         )}
       </CardContent>
 
-      {isFormOpen && (
+      {formTarget !== null && (
         <TransactionForm
+          key={formTarget === 'create' ? 'create' : formTarget.id}
+          transaction={formTarget === 'create' ? undefined : formTarget}
           categories={categories}
           open
           onOpenChange={(next) => {
             if (!next) {
-              setFormOpen(false);
+              setFormTarget(null);
+            }
+          }}
+        />
+      )}
+
+      {deleteTarget !== null && (
+        <TransactionDeleteDialog
+          key={deleteTarget.id}
+          transaction={deleteTarget}
+          open
+          onOpenChange={(next) => {
+            if (!next) {
+              setDeleteTarget(null);
             }
           }}
         />

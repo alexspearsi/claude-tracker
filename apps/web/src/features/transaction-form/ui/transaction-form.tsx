@@ -7,7 +7,9 @@ import { Loader2Icon } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import type { Category } from '@expense/shared';
+import type { Transaction } from '@/entities/transaction/model/types';
 import { createTransactionAction } from '@/features/transaction-form/api/create-transaction.action';
+import { updateTransactionAction } from '@/features/transaction-form/api/update-transaction.action';
 import {
   transactionFormSchema,
   type TransactionFormValues,
@@ -42,6 +44,8 @@ interface TransactionFormProps {
   /** Категории приходят пропом — entities/transaction не может импортировать entities/category
    *  (кросс-импорт между entities запрещён), склейку делает вызывающий widget/view. */
   categories: Category[];
+  /** undefined → создание; заполненная транзакция → редактирование (D-02, TXN-02). */
+  transaction?: Transaction;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
@@ -62,20 +66,30 @@ function todayIsoNoon(): string {
   return buildIsoNoon(new Date());
 }
 
-export function TransactionForm({ categories, open, onOpenChange }: TransactionFormProps) {
+export function TransactionForm({ categories, transaction, open, onOpenChange }: TransactionFormProps) {
   const form = useForm<TransactionFormValues>({
     resolver: zodResolver(transactionFormSchema),
-    defaultValues: {
-      type: 'EXPENSE',
-      amount: '',
-      categoryId: '',
-      date: todayIsoNoon(),
-      description: '',
-    },
+    defaultValues: transaction
+      ? {
+          type: transaction.type,
+          amount: transaction.amount,
+          categoryId: transaction.categoryId,
+          date: transaction.date,
+          description: transaction.description ?? '',
+        }
+      : {
+          type: 'EXPENSE',
+          amount: '',
+          categoryId: '',
+          date: todayIsoNoon(),
+          description: '',
+        },
   });
 
   const onSubmit = form.handleSubmit(async (values) => {
-    const result = await createTransactionAction(values);
+    const result = transaction
+      ? await updateTransactionAction(transaction.id, values)
+      : await createTransactionAction(values);
 
     // TransactionActionState — не дискриминированный по общему полю union, сужаем через 'in'.
     if (result && 'error' in result) {
@@ -109,7 +123,7 @@ export function TransactionForm({ categories, open, onOpenChange }: TransactionF
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Новая транзакция</DialogTitle>
+          <DialogTitle>{transaction ? 'Изменить транзакцию' : 'Новая транзакция'}</DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
@@ -235,7 +249,7 @@ export function TransactionForm({ categories, open, onOpenChange }: TransactionF
 
             <Button type="submit" className="mt-2 w-full" disabled={isSubmitting}>
               {isSubmitting ? <Loader2Icon className="animate-spin" /> : null}
-              Добавить
+              {transaction ? 'Сохранить' : 'Добавить'}
             </Button>
           </form>
         </Form>
