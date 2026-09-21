@@ -24,16 +24,24 @@ interface CategoryDeleteDialogProps {
 
 export function CategoryDeleteDialog({ category, open, onOpenChange }: CategoryDeleteDialogProps) {
   const [isPending, setIsPending] = useState(false);
+  // При 409 (категория используется) диалог остаётся открытым с сообщением внутри —
+  // не тостом и не молчаливым закрытием (D-06).
+  const [blockedMessage, setBlockedMessage] = useState<string | null>(null);
 
   const handleConfirm = async (event: MouseEvent) => {
-    // Radix закрывает AlertDialog сразу после клика — без preventDefault блокировку удаления
-    // (добавляется отдельной задачей) не удастся удержать открытой до ответа сервера.
+    // Radix закрывает AlertDialog сразу после клика — без preventDefault ветка блокировки
+    // не сможет удержать диалог открытым до ответа сервера.
     event.preventDefault();
+    setBlockedMessage(null);
     setIsPending(true);
     const result = await deleteCategoryAction(category.id);
     setIsPending(false);
 
     if (result && 'error' in result) {
+      if (result.blocked) {
+        setBlockedMessage('Нельзя удалить категорию — есть связанные транзакции');
+        return;
+      }
       toast.error(result.error);
       onOpenChange(false);
       return;
@@ -49,6 +57,7 @@ export function CategoryDeleteDialog({ category, open, onOpenChange }: CategoryD
           <AlertDialogTitle>Удалить категорию «{category.name}»?</AlertDialogTitle>
           <AlertDialogDescription>Это действие нельзя отменить.</AlertDialogDescription>
         </AlertDialogHeader>
+        {blockedMessage ? <p className="text-sm text-destructive">{blockedMessage}</p> : null}
         <AlertDialogFooter>
           <AlertDialogCancel>Отмена</AlertDialogCancel>
           <AlertDialogAction
