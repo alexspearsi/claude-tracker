@@ -51,10 +51,10 @@ export function CategoryList({ categories }: CategoryListProps) {
             <TableBody>
               {categories.map((category) => (
                 <TableRow key={category.id}>
-                  <TableCell>
-                    <span className="flex items-center gap-2">
+                  <TableCell className="w-full max-w-0">
+                    <span className="flex min-w-0 items-center gap-2">
                       <CategoryDot color={category.color} />
-                      <span className="truncate">{category.name}</span>
+                      <span className="min-w-0 flex-1 truncate">{category.name}</span>
                     </span>
                   </TableCell>
                   <TableCell className="text-right">
