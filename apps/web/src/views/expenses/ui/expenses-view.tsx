@@ -26,8 +26,8 @@ export async function ExpensesView({ searchParams }: ExpensesViewProps) {
   }
 
   return (
-    <main className="mx-auto flex max-w-4xl flex-col gap-6 p-6">
-      <h1 className="text-2xl font-semibold">Транзакции</h1>
+    <>
+      <h1 className="text-[40px] leading-[1.05] font-extrabold tracking-tight">Транзакции</h1>
       {result.status === 'error' ? (
         <p className="text-sm text-destructive">Не удалось загрузить транзакции: {result.message}</p>
       ) : (
@@ -39,6 +39,6 @@ export async function ExpensesView({ searchParams }: ExpensesViewProps) {
           categories={result.categories}
         />
       )}
-    </main>
+    </>
   );
 }

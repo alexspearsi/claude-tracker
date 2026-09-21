@@ -1,3 +1,4 @@
+import { PencilIcon, Trash2Icon } from 'lucide-react';
 import { CategoryDot } from '@/entities/category/ui/category-dot';
 import { TransactionAmount } from '@/entities/transaction/ui/transaction-amount';
 import { formatDate } from '@/shared/lib/format-date';
@@ -49,17 +50,23 @@ export function ExpensesTable({ rows, onEdit, onDelete }: ExpensesTableProps) {
               <TransactionAmount amount={row.amount} type={row.type} />
             </TableCell>
             <TableCell className="text-right">
-              <div className="flex justify-end gap-2">
-                <Button variant="ghost" size="sm" onClick={() => onEdit(row)}>
-                  Редактировать
+              <div className="flex justify-end gap-0.5">
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  aria-label="Редактировать"
+                  onClick={() => onEdit(row)}
+                >
+                  <PencilIcon className="size-[17px]" />
                 </Button>
                 <Button
                   variant="ghost"
-                  size="sm"
-                  className="text-destructive"
+                  size="icon-sm"
+                  className="text-[var(--expense)] hover:text-[var(--expense)]"
+                  aria-label="Удалить"
                   onClick={() => onDelete(row)}
                 >
-                  Удалить
+                  <Trash2Icon className="size-[17px]" />
                 </Button>
               </div>
             </TableCell>
