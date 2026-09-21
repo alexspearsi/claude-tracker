@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import type { Category } from '@expense/shared';
 import { CategoryDot } from '@/entities/category/ui/category-dot';
+import { CategoryDeleteDialog } from '@/features/category-form/ui/category-delete-dialog';
 import { CategoryForm } from '@/features/category-form/ui/category-form';
 import { Button } from '@/shared/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
@@ -23,6 +24,8 @@ interface CategoryListProps {
 /** Клиентская граница среза категорий — держит состояние открытия диалогов. */
 export function CategoryList({ categories }: CategoryListProps) {
   const [formTarget, setFormTarget] = useState<Category | 'create' | null>(null);
+  // Отдельное от formTarget — форма и подтверждение удаления открываются независимо.
+  const [deleteTarget, setDeleteTarget] = useState<Category | null>(null);
 
   return (
     <Card>
@@ -63,6 +66,14 @@ export function CategoryList({ categories }: CategoryListProps) {
                       >
                         Редактировать
                       </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-destructive"
+                        onClick={() => setDeleteTarget(category)}
+                      >
+                        Удалить
+                      </Button>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -80,6 +91,19 @@ export function CategoryList({ categories }: CategoryListProps) {
           onOpenChange={(next) => {
             if (!next) {
               setFormTarget(null);
+            }
+          }}
+        />
+      )}
+
+      {deleteTarget !== null && (
+        <CategoryDeleteDialog
+          key={deleteTarget.id}
+          category={deleteTarget}
+          open
+          onOpenChange={(next) => {
+            if (!next) {
+              setDeleteTarget(null);
             }
           }}
         />
