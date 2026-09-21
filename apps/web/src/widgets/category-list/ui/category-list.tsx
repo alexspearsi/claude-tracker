@@ -14,6 +14,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/shared/ui/table';
+import { EmptyState } from '@/widgets/category-list/ui/empty-state';
 
 interface CategoryListProps {
   categories: Category[];
@@ -31,27 +32,35 @@ export function CategoryList({ categories }: CategoryListProps) {
         <Button onClick={() => setFormTarget('create')}>Создать категорию</Button>
       </CardHeader>
       <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Категория</TableHead>
-              <TableHead />
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {categories.map((category) => (
-              <TableRow key={category.id}>
-                <TableCell>
-                  <span className="flex items-center gap-2">
-                    <CategoryDot color={category.color} />
-                    <span className="truncate">{category.name}</span>
-                  </span>
-                </TableCell>
-                <TableCell />
+        {categories.length === 0 ? (
+          <EmptyState
+            title="Пока нет категорий"
+            description="Создайте первую категорию, чтобы группировать доходы и расходы"
+            action={<Button onClick={() => setFormTarget('create')}>Создать категорию</Button>}
+          />
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Категория</TableHead>
+                <TableHead />
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {categories.map((category) => (
+                <TableRow key={category.id}>
+                  <TableCell>
+                    <span className="flex items-center gap-2">
+                      <CategoryDot color={category.color} />
+                      <span className="truncate">{category.name}</span>
+                    </span>
+                  </TableCell>
+                  <TableCell />
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
       </CardContent>
 
       {formTarget !== null && (
