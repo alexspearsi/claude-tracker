@@ -8,7 +8,7 @@ allowedTools:
 model: sonnet
 argument-hint: "[title] [base-branch, default main]"
 ---
-
+ 
 # Создание PR по аргументам
 
 Аргументы вызова: `<заголовок PR> [base-branch]` (заголовок — всё, кроме последнего слова,
