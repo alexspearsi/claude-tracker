@@ -6,7 +6,7 @@ allowedTools:
   - Bash(git *)
   - Bash(gh *)
 model: sonnet
-argumentHint: [title] [base-branch, default main]
+argument-hint: "[title] [base-branch, default main]"
 ---
 
 # Создание PR по аргументам
