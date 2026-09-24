@@ -7,14 +7,7 @@ import { CategoryDeleteDialog } from '@/features/category-form/ui/category-delet
 import { CategoryForm } from '@/features/category-form/ui/category-form';
 import { Button } from '@/shared/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/shared/ui/table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shared/ui/table';
 import { EmptyState } from '@/widgets/category-list/ui/empty-state';
 
 interface CategoryListProps {
@@ -59,11 +52,7 @@ export function CategoryList({ categories }: CategoryListProps) {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setFormTarget(category)}
-                      >
+                      <Button variant="ghost" size="sm" onClick={() => setFormTarget(category)}>
                         Редактировать
                       </Button>
                       <Button

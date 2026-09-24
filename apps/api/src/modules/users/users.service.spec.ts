@@ -72,9 +72,7 @@ describe('UsersService', () => {
     it('переводит нарушение unique-констрейнта email в ConflictException', async () => {
       prisma.user.create.mockRejectedValue({ code: 'P2002' });
 
-      await expect(service.create('taken@example.com', 'hash')).rejects.toThrow(
-        ConflictException,
-      );
+      await expect(service.create('taken@example.com', 'hash')).rejects.toThrow(ConflictException);
     });
 
     it('пробрасывает остальные ошибки как есть', async () => {

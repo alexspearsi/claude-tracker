@@ -114,8 +114,9 @@ describe('TransactionsService', () => {
 
       await service.findAll(USER_ID, { dateTo: '2026-09-30' });
 
-      const where = (prisma.transaction.findMany.mock.calls[0]![0] as { where: { date: { lt: Date } } })
-        .where;
+      const where = (
+        prisma.transaction.findMany.mock.calls[0]![0] as { where: { date: { lt: Date } } }
+      ).where;
       expect(where.date.lt.toISOString()).toBe('2026-10-01T00:00:00.000Z');
     });
   });
@@ -189,7 +190,9 @@ describe('TransactionsService', () => {
     const dto: UpdateTransactionDto = { amount: '200.00' };
 
     it('обновляет транзакцию текущего пользователя', async () => {
-      prisma.transaction.update.mockResolvedValue(makeRecord({ amount: new Prisma.Decimal('200.00') }));
+      prisma.transaction.update.mockResolvedValue(
+        makeRecord({ amount: new Prisma.Decimal('200.00') }),
+      );
 
       const result = await service.update(USER_ID, 'tx-1', dto);
 
@@ -266,9 +269,7 @@ describe('TransactionsService', () => {
             _sum: { amount: new Prisma.Decimal('300') },
           },
         ]);
-      prisma.category.findMany.mockResolvedValue([
-        { id: 'cat-1', name: 'Еда', color: '#ff0000' },
-      ]);
+      prisma.category.findMany.mockResolvedValue([{ id: 'cat-1', name: 'Еда', color: '#ff0000' }]);
 
       const result = await service.summary(USER_ID, 9, 2026);
 
@@ -278,7 +279,13 @@ describe('TransactionsService', () => {
       expect(result.from).toBe('2026-09-01T00:00:00.000Z');
       expect(result.to).toBe('2026-10-01T00:00:00.000Z');
       expect(result.byCategory).toEqual([
-        { categoryId: 'cat-1', name: 'Еда', color: '#ff0000', type: TransactionType.EXPENSE, total: '300.00' },
+        {
+          categoryId: 'cat-1',
+          name: 'Еда',
+          color: '#ff0000',
+          type: TransactionType.EXPENSE,
+          total: '300.00',
+        },
       ]);
     });
 

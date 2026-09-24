@@ -7,14 +7,7 @@ import { toast } from 'sonner';
 import { loginSchema, type LoginInput } from '@expense/shared';
 import { loginAction } from '@/features/auth/api/login.action';
 import { Button } from '@/shared/ui/button';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/shared/ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/ui/form';
 import { Input } from '@/shared/ui/input';
 
 export function LoginForm() {
@@ -43,12 +36,7 @@ export function LoginForm() {
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input
-                  type="email"
-                  autoComplete="email"
-                  placeholder="you@example.com"
-                  {...field}
-                />
+                <Input type="email" autoComplete="email" placeholder="you@example.com" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

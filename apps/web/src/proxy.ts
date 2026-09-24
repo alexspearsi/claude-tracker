@@ -8,9 +8,7 @@ import { ACCESS_COOKIE, REFRESH_COOKIE } from '@/entities/session/model/cookies'
 import { GUEST_ROUTES, PROTECTED_ROUTES, ROUTES } from '@/shared/config/routes';
 
 function isProtected(pathname: string): boolean {
-  return PROTECTED_ROUTES.some(
-    (route) => pathname === route || pathname.startsWith(`${route}/`),
-  );
+  return PROTECTED_ROUTES.some((route) => pathname === route || pathname.startsWith(`${route}/`));
 }
 
 function isGuestOnly(pathname: string): boolean {

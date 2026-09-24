@@ -60,11 +60,7 @@ export function CategoryDeleteDialog({ category, open, onOpenChange }: CategoryD
         {blockedMessage ? <p className="text-sm text-destructive">{blockedMessage}</p> : null}
         <AlertDialogFooter>
           <AlertDialogCancel>Отмена</AlertDialogCancel>
-          <AlertDialogAction
-            variant="destructive"
-            onClick={handleConfirm}
-            disabled={isPending}
-          >
+          <AlertDialogAction variant="destructive" onClick={handleConfirm} disabled={isPending}>
             {isPending ? <Loader2Icon className="animate-spin" /> : null}
             Удалить
           </AlertDialogAction>
