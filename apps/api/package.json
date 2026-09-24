@@ -9,6 +9,7 @@
     "start": "node dist/main.js",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
+    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:deploy": "prisma migrate deploy",
@@ -42,11 +43,15 @@
     "@nestjs/testing": "12.0.1",
     "@types/bcrypt": "^6.0.0",
     "@types/express": "^5.0.0",
+    "@types/jest": "^30.0.0",
     "@types/node": "26.5.0",
     "@types/passport-jwt": "^4.0.1",
     "@types/pg": "8.23.1",
+    "cross-env": "^10.1.0",
     "eslint": "9.39.5",
+    "jest": "^30.5.2",
     "prisma": "7.10.0",
+    "ts-jest": "^29.4.13",
     "typescript": "6.0.3",
     "typescript-eslint": "8.70.0"
   }
