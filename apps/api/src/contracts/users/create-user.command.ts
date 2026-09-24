@@ -6,6 +6,11 @@ export interface UserRecord {
   createdAt: Date;
 }
 
+/**
+ * Команда создания пользователя — CQRS-контракт между `AuthModule` (регистрация) и
+ * `UsersModule` (единственный обработчик, `CreateUserHandler`), не пересекается напрямую.
+ * @param passwordHash пароль уже захеширован вызывающим — сервис пользователей паролей не хеширует
+ */
 export class CreateUserCommand {
   constructor(
     public readonly email: string,

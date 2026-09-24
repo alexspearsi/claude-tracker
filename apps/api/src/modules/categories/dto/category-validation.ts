@@ -1,10 +1,14 @@
 import type { TransformFnParams } from 'class-transformer';
 
-/** Правила повторяют createCategorySchema из @expense/shared — при правке менять оба места. */
+/**
+ * Общие константы и сообщения валидации для `CreateCategoryDto`/`UpdateCategoryDto`.
+ * Правила повторяют createCategorySchema из @expense/shared — при правке менять оба места.
+ */
 export const CATEGORY_NAME_MAX = 50;
 export const CATEGORY_ICON_MAX = 50;
 export const CATEGORY_COLOR_PATTERN = /^#[0-9a-fA-F]{6}$/;
 
+/** Тексты ошибок валидации, отдаваемые class-validator в ответе 400. */
 export const messages = {
   nameString: 'Название должно быть строкой',
   nameEmpty: 'Название не может быть пустым',
