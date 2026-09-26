@@ -6,6 +6,7 @@ import { LogoutButton } from '@/features/auth/ui/logout-button';
 import { ApiError } from '@/shared/api/api-client';
 import { ROUTES } from '@/shared/config/routes';
 import { MainNav } from '@/widgets/app-header/ui/main-nav';
+import { MobileNav } from '@/widgets/app-header/ui/mobile-nav';
 
 type DisplayNameResult = { status: 'ok'; name: string } | { status: 'unauthorized' };
 
@@ -43,15 +44,16 @@ export async function AppHeader() {
   }
 
   return (
-    <header className="flex items-center justify-between gap-4 border-b px-6 py-3">
-      <div className="flex items-center gap-6">
-        <span className="font-semibold">Трекер расходов</span>
-        <MainNav />
+    <header className="flex items-center justify-between gap-4 border-b px-4 py-3 sm:px-6">
+      <div className="flex min-w-0 items-center gap-6">
+        <span className="shrink-0 font-semibold">Трекер расходов</span>
+        <MainNav className="hidden md:flex" />
       </div>
-      <div className="flex items-center gap-3">
+      <div className="hidden items-center gap-3 md:flex">
         <span className="text-sm text-muted-foreground">{result.name}</span>
         <LogoutButton />
       </div>
+      <MobileNav userName={result.name} logoutButton={<LogoutButton />} />
     </header>
   );
 }
