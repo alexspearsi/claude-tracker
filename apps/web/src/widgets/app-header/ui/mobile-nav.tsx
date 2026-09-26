@@ -7,6 +7,7 @@ import type { ReactNode } from 'react';
 import { NAV_ITEMS } from '@/shared/config/navigation';
 import { cn } from '@/shared/lib/utils';
 import { Button } from '@/shared/ui/button';
+import { Logo } from '@/shared/ui/logo';
 import {
   Sheet,
   SheetClose,
@@ -27,6 +28,7 @@ type MobileNavProps = {
  */
 export function MobileNav({ userName, logoutButton }: MobileNavProps) {
   const pathname = usePathname();
+  const initial = userName.trim().charAt(0).toUpperCase() || '?';
 
   return (
     <Sheet>
@@ -37,7 +39,9 @@ export function MobileNav({ userName, logoutButton }: MobileNavProps) {
       </SheetTrigger>
       <SheetContent side="right" className="flex flex-col">
         <SheetHeader>
-          <SheetTitle>Трекер расходов</SheetTitle>
+          <SheetTitle asChild>
+            <Logo size="sm" />
+          </SheetTitle>
         </SheetHeader>
         <nav className="flex flex-col gap-1 px-4">
           {NAV_ITEMS.map((item) => {
@@ -47,8 +51,8 @@ export function MobileNav({ userName, logoutButton }: MobileNavProps) {
                 <Link
                   href={item.href}
                   className={cn(
-                    'rounded-md px-2 py-2 text-sm transition-colors hover:bg-accent',
-                    isActive ? 'font-medium text-foreground' : 'text-muted-foreground',
+                    'rounded-full px-4 py-2.5 text-[15px] font-semibold transition-colors hover:bg-white/70 dark:hover:bg-white/10',
+                    isActive ? 'lg-nav-active text-foreground' : 'text-muted-foreground',
                   )}
                 >
                   {item.label}
@@ -57,8 +61,13 @@ export function MobileNav({ userName, logoutButton }: MobileNavProps) {
             );
           })}
         </nav>
-        <div className="mt-auto flex items-center justify-between border-t px-4 py-4">
-          <span className="truncate text-sm text-muted-foreground">{userName}</span>
+        <div className="mt-auto flex items-center justify-between gap-3 border-t border-white/40 px-4 py-4 dark:border-white/10">
+          <div className="flex min-w-0 items-center gap-2.5">
+            <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#a78bfa] to-[#60a5fa] text-[13px] font-extrabold text-white">
+              {initial}
+            </div>
+            <span className="truncate text-sm font-semibold">{userName}</span>
+          </div>
           {logoutButton}
         </div>
       </SheetContent>

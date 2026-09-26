@@ -10,7 +10,12 @@ export function MainNav({ className }: { className?: string }) {
   const pathname = usePathname();
 
   return (
-    <nav className={cn('items-center gap-4 text-sm', className)}>
+    <nav
+      className={cn(
+        'items-center gap-1 rounded-full border border-white/60 bg-white/28 p-1 dark:border-white/15 dark:bg-white/5',
+        className,
+      )}
+    >
       {NAV_ITEMS.map((item) => {
         // Точный матч либо вложенный путь: /expenses/123 тоже подсвечивает «Транзакции».
         const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
@@ -19,8 +24,10 @@ export function MainNav({ className }: { className?: string }) {
             key={item.href}
             href={item.href}
             className={cn(
-              'transition-colors hover:text-foreground',
-              isActive ? 'font-medium text-foreground' : 'text-muted-foreground',
+              'flex h-10 items-center rounded-full px-[18px] text-[15px] font-semibold transition-colors',
+              isActive
+                ? 'lg-nav-active text-foreground'
+                : 'text-muted-foreground hover:text-foreground',
             )}
           >
             {item.label}

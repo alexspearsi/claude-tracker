@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { getSession } from '@/entities/session/api/session';
 import { ROUTES } from '@/shared/config/routes';
+import { BlobBackground } from '@/shared/ui/blob-background';
 import { AppHeader } from '@/widgets/app-header/ui/app-header';
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -12,9 +13,12 @@ export default async function DashboardLayout({ children }: { children: React.Re
   }
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="relative flex min-h-screen flex-col">
+      <BlobBackground />
       <AppHeader />
-      {children}
+      <div className="flex-1 px-8 pt-[128px] pb-10">
+        <div className="mx-auto flex max-w-[1216px] flex-col gap-6">{children}</div>
+      </div>
     </div>
   );
 }
