@@ -18,3 +18,35 @@ export interface TransactionList {
   items: Transaction[];
   total: number;
 }
+
+/** Тело POST /transactions — зеркало CreateTransactionDto. */
+export interface CreateTransactionInput {
+  amount: string;
+  type: TransactionType;
+  categoryId: string;
+  date: string; // полный ISO-таймстамп, полдень UTC — см. transaction-form.tsx
+  description?: string | null;
+}
+
+/** Тело PATCH /transactions/:id — все поля необязательны. */
+export type UpdateTransactionInput = Partial<CreateTransactionInput>;
+
+export interface SummaryCategoryItem {
+  categoryId: string;
+  name: string;
+  color: string;
+  type: TransactionType;
+  total: string;
+}
+
+/** Ответ GET /transactions/summary?month=&year= — доход/расход/баланс за месяц + разбивка по категориям. */
+export interface TransactionSummary {
+  month: number;
+  year: number;
+  from: string; // включительно
+  to: string; // исключительно — первое число следующего месяца
+  income: string;
+  expense: string;
+  balance: string; // income - expense, может быть отрицательным
+  byCategory: SummaryCategoryItem[];
+}

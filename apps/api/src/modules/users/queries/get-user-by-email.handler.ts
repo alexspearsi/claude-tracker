@@ -5,6 +5,10 @@ import {
 } from '../../../contracts/users/get-user-by-email.query.js';
 import { UsersService } from '../users.service.js';
 
+/**
+ * Обрабатывает {@link GetUserByEmailQuery}, делегируя в {@link UsersService.findByEmail}.
+ * Используется `LoginHandler` — единственное место, которому нужен `passwordHash`.
+ */
 @QueryHandler(GetUserByEmailQuery)
 export class GetUserByEmailHandler implements IQueryHandler<GetUserByEmailQuery> {
   constructor(private readonly users: UsersService) {}

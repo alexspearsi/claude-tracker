@@ -8,14 +8,26 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-expense}
       POSTGRES_DB: ${POSTGRES_DB:-expense_tracker}
     ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+      - '${POSTGRES_PORT:-5432}:5432'
     volumes:
       - db-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-expense} -d ${POSTGRES_DB:-expense_tracker}"]
+      test:
+        ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-expense} -d ${POSTGRES_DB:-expense_tracker}']
       interval: 5s
       timeout: 5s
       retries: 10
+  dbhub:
+    image: bytebase/dbhub:latest
+    ports:
+      - '8090:8090'
+    command:
+      - '--transport=http'
+      - '--port=8090'
+      - '--dsn=postgresql://${POSTGRES_USER:-expense}:${POSTGRES_PASSWORD:-expense}@db:5432/${POSTGRES_DB:-expense_tracker}?sslmode=disable'
+    depends_on:
+      db:
+        condition: service_healthy
 
 volumes:
   db-data:

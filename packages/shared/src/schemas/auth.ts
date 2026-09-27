@@ -4,10 +4,7 @@ import { z } from 'zod';
 // поэтому текст ошибки пишется один раз здесь и виден в обоих местах.
 export const registerSchema = z.object({
   email: z.email('Некорректный email'),
-  password: z
-    .string()
-    .min(8, 'Минимум 8 символов')
-    .max(72, 'Не длиннее 72 символов'),
+  password: z.string().min(8, 'Минимум 8 символов').max(72, 'Не длиннее 72 символов'),
   name: z.string().min(1, 'Введите имя').max(80, 'Не длиннее 80 символов').optional(),
 });
 

@@ -11,20 +11,8 @@ import { CATEGORY_COLORS } from '@/features/category-form/model/palette';
 import type { CategoryFormValues } from '@/features/category-form/model/types';
 import { ColorSwatchPicker } from '@/features/category-form/ui/color-swatch-picker';
 import { Button } from '@/shared/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/shared/ui/dialog';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/shared/ui/form';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/shared/ui/dialog';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/ui/form';
 import { Input } from '@/shared/ui/input';
 
 interface CategoryFormProps {

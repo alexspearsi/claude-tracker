@@ -22,7 +22,16 @@ export function totalPages(total: number): number {
   return Math.max(1, Math.ceil(total / PAGE_SIZE));
 }
 
-/** Страница 1 — без query-параметра в URL. */
-export function pageHref(basePath: string, page: number): string {
-  return page <= 1 ? basePath : `${basePath}?page=${page}`;
+/**
+ * Страница 1 — без query-параметра page в URL. Необязательный params — активные
+ * фильтры (например, из filtersToParams), которые должны пережить переход по страницам;
+ * без них фильтр терялся бы при клике «Вперёд»/«Назад» (см. 02-04-PLAN.md, задача 1).
+ */
+export function pageHref(basePath: string, page: number, params?: URLSearchParams): string {
+  const query = new URLSearchParams(params);
+  if (page > 1) {
+    query.set('page', String(page));
+  }
+  const queryString = query.toString();
+  return queryString ? `${basePath}?${queryString}` : basePath;
 }

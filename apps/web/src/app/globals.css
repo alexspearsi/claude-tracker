@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap');
 @import 'tailwindcss';
 
 /* Токены темы shadcn/ui. Tailwind v4 читает их прямо из CSS — без tailwind.config.js. */
@@ -20,59 +21,217 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-income: var(--income);
+  --color-expense: var(--expense);
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
+  --font-sans: 'Manrope', system-ui, -apple-system, 'Segoe UI', sans-serif;
 }
 
+/*
+ * Дизайн «Liquid Glass» (glassmorphism), перенесён из макетов Claude Design
+ * (см. .planning/design/liquid-glass — источник и токены). Акцент настраиваемый
+ * (HeroUI-палитра: фиолетовый/синий/бирюзовый/янтарный), по умолчанию — фиолетовый.
+ */
+/*
+ * ВАЖНО: каждая CSS-переменная объявляется в этом файле ровно один раз на селектор.
+ * Lightning CSS (сборщик Tailwind v4 в Next.js) при минификации не гарантирует
+ * сохранение порядка при повторном объявлении одного и того же custom property
+ * внутри правила — переопределение вида «--primary: A; ... --primary: B;» в одном
+ * :root на выходе может схлопнуться в обратном порядке, и B молча проиграет A.
+ * Поэтому акцентные токены объявлены заранее и подставляются сразу, без повтора.
+ */
 :root {
-  --radius: 0.625rem;
+  --radius: 1.25rem;
   --background: oklch(1 0 0);
-  --foreground: oklch(0.21 0.03 264);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.21 0.03 264);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.21 0.03 264);
-  --primary: oklch(0.55 0.19 259);
   --primary-foreground: oklch(0.98 0 0);
   --secondary: oklch(0.97 0.01 264);
   --secondary-foreground: oklch(0.21 0.03 264);
   --muted: oklch(0.97 0.01 264);
-  --muted-foreground: oklch(0.55 0.02 264);
   --accent: oklch(0.97 0.01 264);
   --accent-foreground: oklch(0.21 0.03 264);
   --destructive: oklch(0.58 0.24 28);
   --border: oklch(0.92 0.01 264);
   --input: oklch(0.92 0.01 264);
-  --ring: oklch(0.55 0.19 259);
+
+  /* Liquid Glass — акцент и текст поверх лавандового фона (см. .planning для источника) */
+  --lg-accent: #7828c8;
+  --lg-ink: #141226;
+  --lg-muted: #5a5878;
+  --lg-bg: #eceefb;
+  --income: #12a150;
+  --expense: #c20e4d;
+
+  --primary: var(--lg-accent);
+  --ring: var(--lg-accent);
+  --foreground: var(--lg-ink);
+  --muted-foreground: var(--lg-muted);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --background: oklch(0.21 0.03 264);
-    --foreground: oklch(0.98 0 0);
     --card: oklch(0.27 0.03 264);
     --card-foreground: oklch(0.98 0 0);
     --popover: oklch(0.27 0.03 264);
     --popover-foreground: oklch(0.98 0 0);
-    --primary: oklch(0.71 0.14 255);
-    --primary-foreground: oklch(0.21 0.03 264);
+    --primary-foreground: #fff;
     --secondary: oklch(0.28 0.03 264);
     --secondary-foreground: oklch(0.98 0 0);
     --muted: oklch(0.28 0.03 264);
-    --muted-foreground: oklch(0.71 0.02 264);
     --accent: oklch(0.32 0.03 264);
     --accent-foreground: oklch(0.98 0 0);
     --destructive: oklch(0.7 0.19 22);
     --border: oklch(0.37 0.03 264);
     --input: oklch(0.37 0.03 264);
-    --ring: oklch(0.55 0.14 255);
+
+    /* Акцент остаётся тем же фиолетовым (или выбранным HeroUI-вариантом) в обеих
+       темах — только приглушённые/фоновые токены меняются на тёмный вариант. */
+    --lg-ink: oklch(0.98 0 0);
+    --lg-muted: oklch(0.71 0.02 264);
+    --lg-bg: oklch(0.18 0.03 264);
+    --income: #22c55e;
+    --expense: #f43f5e;
+
+    --primary: var(--lg-accent);
+    --ring: var(--lg-accent);
+    --foreground: var(--lg-ink);
+    --muted-foreground: var(--lg-muted);
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
+  font-family: var(--font-sans);
+  font-feature-settings: 'tnum';
+  -webkit-font-smoothing: antialiased;
+}
+
+/*
+ * Liquid Glass — утилитарные классы 1:1 из макетов (.glass/.glass-soft/.glass-pill —
+ * три ступени интенсивности стекла: карточки/панели/навигация; .blob — фоновые пятна).
+ * Светлые значения зафиксированы под макет; в тёмной теме — приглушённая адаптация
+ * (отдельного тёмного макета не было, экраны его не требовали).
+ */
+@layer utilities {
+  .lg-bg {
+    background: var(--lg-bg);
+  }
+  .lg-blob {
+    position: absolute;
+    border-radius: 9999px;
+    filter: blur(90px);
+    opacity: 0.85;
+    pointer-events: none;
+  }
+  .lg-glass {
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.78);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.95),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.3),
+      0 14px 44px rgba(64, 52, 150, 0.12);
+  }
+  /*
+   * !important здесь не стилистический выбор: у Chromium подтверждён баг —
+   * background-color/color, объявленные внутри именованного @layer (в т.ч. слой
+   * utilities Tailwind v4), полностью проигрывают UA-стилям на <button> независимо
+   * от порядка слоёв и specificity (воспроизведено на пустом тестовом <button> без
+   * единого класса проекта). !important — единственное, что переопределяет UA-origin.
+   */
+  .lg-btn-primary {
+    background-color: var(--primary) !important;
+    color: var(--primary-foreground) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.35),
+      0 10px 24px rgba(120, 40, 200, 0.35);
+  }
+  .lg-btn-destructive {
+    background-color: var(--destructive) !important;
+    color: #fff !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.25),
+      0 10px 24px rgba(194, 14, 77, 0.3);
+  }
+  .lg-btn-secondary {
+    background-color: var(--secondary) !important;
+    color: var(--secondary-foreground) !important;
+  }
+  .lg-glass-soft {
+    background: rgba(255, 255, 255, 0.34) !important;
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    border: 1px solid rgba(255, 255, 255, 0.65);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.85),
+      0 6px 24px rgba(64, 52, 150, 0.08);
+  }
+  .lg-glass-pill {
+    background: rgba(255, 255, 255, 0.42);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.95),
+      0 10px 30px rgba(64, 52, 150, 0.12);
+  }
+  .lg-nav-active {
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow:
+      0 2px 10px rgba(64, 52, 150, 0.14),
+      inset 0 1px 0 #fff;
+  }
+  .lg-input {
+    background: rgba(255, 255, 255, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    box-shadow:
+      inset 0 1px 2px rgba(64, 52, 150, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  }
+  .lg-input:focus-visible {
+    border-color: var(--lg-accent);
+    box-shadow: 0 0 0 4px rgba(120, 40, 200, 0.16);
+  }
+  .lg-row-hover:hover {
+    background: rgba(255, 255, 255, 0.45);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .lg-glass {
+      background: rgba(30, 27, 56, 0.55);
+      border-color: rgba(255, 255, 255, 0.12);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.06),
+        0 14px 44px rgba(0, 0, 0, 0.35);
+    }
+    .lg-glass-soft {
+      background: rgba(30, 27, 56, 0.4) !important;
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+    .lg-glass-pill {
+      background: rgba(30, 27, 56, 0.5);
+      border-color: rgba(255, 255, 255, 0.12);
+    }
+    .lg-nav-active {
+      background: rgba(255, 255, 255, 0.12);
+    }
+    .lg-input {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.14);
+    }
+    .lg-row-hover:hover {
+      background: rgba(255, 255, 255, 0.06);
+    }
+  }
 }

@@ -9,5 +9,9 @@
       "PowerShell(Test-Path *)",
       "PowerShell(try { \\(Invoke-WebRequest -Uri http://localhost:4001/api/health -UseBasicParsing -TimeoutSec 5\\).Content } catch { \"api down: $\\($_.Exception.Message\\)\" })"
     ]
-  }
+  },
+  "enabledMcpjsonServers": [
+    "dbhub"
+  ],
+  "enableAllProjectMcpServers": true
 }

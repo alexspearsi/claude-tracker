@@ -1,20 +1,12 @@
 'use client';
 
 import { useState } from 'react';
+import { PencilIcon, Trash2Icon } from 'lucide-react';
 import type { Category } from '@expense/shared';
-import { CategoryDot } from '@/entities/category/ui/category-dot';
 import { CategoryDeleteDialog } from '@/features/category-form/ui/category-delete-dialog';
 import { CategoryForm } from '@/features/category-form/ui/category-form';
 import { Button } from '@/shared/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/shared/ui/table';
 import { EmptyState } from '@/widgets/category-list/ui/empty-state';
 
 interface CategoryListProps {
@@ -41,45 +33,46 @@ export function CategoryList({ categories }: CategoryListProps) {
             action={<Button onClick={() => setFormTarget('create')}>Создать категорию</Button>}
           />
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Категория</TableHead>
-                <TableHead />
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {categories.map((category) => (
-                <TableRow key={category.id}>
-                  <TableCell className="w-full max-w-0">
-                    <span className="flex min-w-0 items-center gap-2">
-                      <CategoryDot color={category.color} />
-                      <span className="min-w-0 flex-1 truncate">{category.name}</span>
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setFormTarget(category)}
-                      >
-                        Редактировать
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-destructive"
-                        onClick={() => setDeleteTarget(category)}
-                      >
-                        Удалить
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <div className="grid grid-cols-2 gap-5 lg:grid-cols-4">
+            {categories.map((category) => (
+              <article
+                key={category.id}
+                className="lg-glass flex flex-col gap-4 rounded-3xl p-5"
+              >
+                <div className="flex items-center justify-between">
+                  <div
+                    className="flex size-11 items-center justify-center rounded-2xl"
+                    style={{ background: `${category.color}22` }}
+                  >
+                    <span
+                      className="inline-block size-3.5 rounded-full"
+                      style={{ backgroundColor: category.color, boxShadow: `0 0 0 3px ${category.color}33` }}
+                    />
+                  </div>
+                  <div className="flex gap-0.5">
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      aria-label={`Редактировать ${category.name}`}
+                      onClick={() => setFormTarget(category)}
+                    >
+                      <PencilIcon className="size-[17px]" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      className="text-[var(--expense)] hover:text-[var(--expense)]"
+                      aria-label={`Удалить ${category.name}`}
+                      onClick={() => setDeleteTarget(category)}
+                    >
+                      <Trash2Icon className="size-[17px]" />
+                    </Button>
+                  </div>
+                </div>
+                <span className="truncate text-lg font-extrabold tracking-tight">{category.name}</span>
+              </article>
+            ))}
+          </div>
         )}
       </CardContent>
 

@@ -9,7 +9,7 @@ export function CategoryDot({ color, className }: CategoryDotProps) {
     <span
       aria-hidden="true"
       className={className ?? 'inline-block size-2.5 shrink-0 rounded-full'}
-      style={{ backgroundColor: color }}
+      style={{ backgroundColor: color, boxShadow: `0 0 0 3px ${color}33` }}
     />
   );
 }

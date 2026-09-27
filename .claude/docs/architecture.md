@@ -225,6 +225,78 @@ DTO в контроллерах импортируются **значением*
   рендерятся в строках транзакций на соседних экранах, ревалидации только
   `/categories` недостаточно.
 
+### Срез транзакций (CRUD + фильтры)
+
+`features/transaction-form` — **один** общий слайс на оба экрана, а не два независимых
+компонента: `TransactionForm` сама рендерит свой `Dialog` (D-02), вызывающие места
+(`widgets/quick-add-transaction` на `/dashboard`, `widgets/expenses-list` на `/expenses`) её не
+оборачивают — второй слой `Dialog` дал бы вложенные примитивы Radix. Один и тот же компонент
+обслуживает создание (`transaction` не передан) и редактирование (`transaction` — заполненная
+запись): заголовок, подпись кнопки сабмита и выбор Server Action (`createTransactionAction` /
+`updateTransactionAction`) переключаются по наличию пропа.
+
+Цепочка слоёв та же, что и у категорий: `app/(dashboard)/expenses/page.tsx` → `views/expenses`
+(серверный компонент, разбирает `searchParams` — страницу и фильтры) → `widgets/expenses-list`
+(клиентская граница: карточка, состояние открытых `Dialog`/`AlertDialog`, панель фильтров) →
+`features/transaction-form` (Server Actions) → `entities/transaction/api`. На `/dashboard` та же
+форма подключена через `widgets/quick-add-transaction`, встроенный в шапку
+`widgets/recent-transactions` через проп `headerAction`.
+
+Мутации транзакций ревалидируют обе поверхности через `TRANSACTION_AFFECTED_PATHS`
+(`features/transaction-form/model/affected-paths.ts`, `[ROUTES.dashboard, ROUTES.expenses]`) —
+имя и цвет категории транзакция не хранит сама (см. ниже), но сама сумма/дата/описание видны и
+там, и там. `/categories` в этот список не входит: мутация транзакции не меняет категорию.
+
+`PaginationNav` (переиспользуется `widgets/recent-transactions` и `widgets/expenses-list`) живёт
+в `shared/ui`, а не копируется — FSD запрещает кросс-импорт между двумя `widgets` одного слоя,
+а общий презентационный код по конвенции опускается на слой ниже, не дублируется. Тот же
+компонент принимает необязательный `params: URLSearchParams` — пагинация `/expenses` передаёт
+туда текущие фильтры, чтобы переход по страницам их не терял.
+
+Фильтры (`widgets/expenses-list/model/filters.ts`, TXN-06/D-04) не имеют собственного
+клиентского состояния — источник правды строка запроса. `TransactionFiltersPanel` только читает
+проп `filters` (пришедший из RSC-разбора `searchParams`) и на любое изменение пушет новый URL
+через `router.push(filtersHref(...))`; номер страницы туда никогда не попадает — смена фильтра
+всегда возвращает на первую страницу. Испорченное значение параметра (не `INCOME`/`EXPENSE`, не
+UUID, не `YYYY-MM-DD`) трактуется на границе как «фильтр не задан», а не как ошибка — тот же
+принцип, что уже применён к `?page` в `parsePage` (`shared/lib/pagination.ts`).
+
+Два разных формата даты в одном срезе — источник частых ошибок при правке:
+- В теле `POST`/`PATCH /transactions` дата уходит **полным ISO-таймстампом на полдень UTC**
+  (`buildIsoNoon` в `transaction-form.tsx`) — `toISOString()` локальной полуночи в
+  положительных часовых поясах даёт предыдущие сутки по UTC, календарный день бы съехал.
+- В query-параметрах фильтра (`dateFrom`/`dateTo`) дата уходит **календарной датой без
+  времени** (`format(date, 'yyyy-MM-dd')` в `transaction-filters.tsx`) — сервис
+  (`buildDateFilter` в `transactions.service.ts`) различает форматы по `.includes('T')` и
+  включает весь последний день периода, только если время не передано; передача таймстампа с
+  полднем в `dateTo` обрезала бы вторую половину последнего дня.
+
+У транзакций нет Zod-схемы в `@expense/shared` — `features/transaction-form/model/transaction-form-schema.ts`
+вручную зеркалит `apps/api/src/modules/transactions/dto/transaction-validation.ts`; `npm run
+typecheck` расхождение значений (лимитов, паттернов) между ними не ловит, менять оба места при
+правке правил.
+
+### Срез сводки (только чтение)
+
+`widgets/monthly-summary` читает уже существующий `GET /transactions/summary?month=&year=`
+(api этой фазой не меняется, реализован в фазе 2) через один серверный лоадер
+`loadMonthlySummary` с простым `try/catch` — в отличие от двухзапросного
+`Promise.allSettled`-паттерна `loadRecentTransactions`/`loadTransactions`, здесь не нужен
+второй запрос категорий: `SummaryCategoryItem` уже содержит `name`/`color` от сервера
+(групповая выборка на api джойнит категорию сама). Месяц/год вычисляются на сервере из
+`now.getUTCMonth() + 1`/`now.getUTCFullYear()` (не локальное время) — api считает границы
+месяца через `Date.UTC`, локальное время процесса может разойтись на стыке месяца.
+
+Виджет — одна `Card` на `/dashboard`, подключён перед `RecentTransactions` (сводка — общая
+картина, читается первой). Внутри: строка из трёх показателей (Баланс/Доходы/Расходы) и
+таблица разбивки по категориям под разделителем. Баланс намеренно **не имеет** цветовой
+семантики — нейтральный текст даже при отрицательном значении, в отличие от `TransactionAmount`
+(доход/расход), у которого цвет несёт смысл. `TransactionAmount`/`CategoryDot` переиспользованы
+напрямую в строках таблицы категорий; React-ключ строки — `` `${categoryId}-${type}` ``, не
+голый `categoryId` — групповая выборка `groupBy(['categoryId', 'type'])` на api может дать две
+строки с одним и тем же `categoryId`, если категория использована и как доход, и как расход в
+одном месяце.
+
 ### Защита роутов и обновление токена
 
 `apps/web/src/proxy.ts` — в Next 16 конвенция `middleware.ts` переименована в
@@ -252,8 +324,10 @@ Server Action, Route Handler и proxy.
 - Неизвестный роут отдаёт HTML от Express мимо `HttpExceptionFilter` (см.
   «Обработка ошибок» выше).
 - Тестового раннера в проекте нет.
-- Страница `/expenses` на фронте — заглушка без данных, транзакции с UI пока
-  не связаны (`/categories` уже работает как полноценный CRUD).
+- Пункт меню «Транзакции» ведёт на `/expenses` (сущность в api — `transaction`, модуль
+  `expenses` удалён ещё при введении транзакций) — переименование роута не входило в скоуп
+  фазы 2, зафиксировано пользователем явно (D-05), осознанный техдолг.
+- `prisma/seed.ts` не заполнен.
 
 См. также `dev-guide.md` (как добавить модуль/фичу/миграцию), `api.md`
 (список эндпоинтов), `database.md` (схема БД).

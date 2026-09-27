@@ -13,6 +13,12 @@ import { RegisterHandler } from './commands/register.handler.js';
 import { JwtStrategy } from './jwt.strategy.js';
 import { TokensService } from './tokens.service.js';
 
+/**
+ * Модуль аутентификации: JWT access/refresh с ротацией, CQRS-хендлеры команд login/register/
+ * refresh/logout. Единственное место, где импортирован `PassportModule` — глобальный
+ * `JwtAuthGuard` регистрируется здесь через `APP_GUARD`, поэтому все роуты приложения
+ * закрыты по умолчанию, кроме помеченных `@Public()`.
+ */
 @Module({
   imports: [ConfigModule, PassportModule, JwtModule.register({}), CqrsModule],
   controllers: [AuthController],
