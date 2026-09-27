@@ -5,12 +5,20 @@ import { CurrentUser, type AuthUser } from '../../common/decorators/current-user
 import { GetUserByIdQuery } from '../../contracts/users/get-user-by-id.query.js';
 import type { UserRecord } from '../../contracts/users/create-user.command.js';
 
+/** HTTP-контроллер профиля текущего пользователя. */
 @Controller('users')
 export class UsersController {
   constructor(private readonly queryBus: QueryBus) {}
 
+  /**
+   * Возвращает профиль пользователя, чей access-токен передан в запросе.
+   * @throws NotFoundException если пользователь из токена уже удалён из БД
+   */
   @Get('me')
-  async me(@CurrentUser() user: AuthUser): Promise<UserProfile> {
+  async me(
+    @CurrentUser()
+    user: AuthUser,
+  ): Promise<UserProfile> {
     const record = await this.queryBus.execute<GetUserByIdQuery, UserRecord | null>(
       new GetUserByIdQuery(user.id),
     );

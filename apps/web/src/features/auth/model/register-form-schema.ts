@@ -9,9 +9,7 @@ import { registerSchema } from '@expense/shared';
  */
 export const registerFormSchema = registerSchema.extend({
   name: z.string().max(80, 'Не длиннее 80 символов'),
-  agreeToTerms: z
-    .boolean()
-    .refine((value) => value, { message: 'Нужно согласиться с условиями' }),
+  agreeToTerms: z.boolean().refine((value) => value, { message: 'Нужно согласиться с условиями' }),
 });
 
 export type RegisterFormValues = z.infer<typeof registerFormSchema>;

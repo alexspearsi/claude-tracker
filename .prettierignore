@@ -1,0 +1,17 @@
+node_modules
+dist
+build
+.next
+out
+coverage
+*.tsbuildinfo
+apps/api/src/generated
+apps/web/next-env.d.ts
+package-lock.json
+
+# артефакты GSD-планирования — не код проекта
+.planning
+
+# служебные файлы Claude Code и GitHub Actions — не код проекта
+.claude
+.github

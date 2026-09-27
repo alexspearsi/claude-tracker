@@ -3,6 +3,7 @@ import { GetUserByIdQuery } from '../../../contracts/users/get-user-by-id.query.
 import type { UserRecord } from '../../../contracts/users/create-user.command.js';
 import { UsersService } from '../users.service.js';
 
+/** Обрабатывает {@link GetUserByIdQuery}, делегируя в {@link UsersService.findById}. */
 @QueryHandler(GetUserByIdQuery)
 export class GetUserByIdHandler implements IQueryHandler<GetUserByIdQuery> {
   constructor(private readonly users: UsersService) {}

@@ -1,0 +1,50 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell.exe -NoProfile -File \"$CLAUDE_PROJECT_DIR/.claude/hooks/stop-notify.ps1\""
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/protected.sh\""
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "shell": "bash",
+            "command": "node -e 'let d=\"\";process.stdin.on(\"data\",c=>d+=c);process.stdin.on(\"end\",()=>{try{const j=JSON.parse(d);const fp=j.tool_input&&j.tool_input.file_path;if(!fp)return;require(\"child_process\").spawnSync(\"npx\",[\"--yes\",\"prettier\",\"--ignore-unknown\",\"--write\",fp],{stdio:\"inherit\",shell:true});}catch(e){}})' 2>/dev/null || true",
+            "timeout": 30
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "shell": "bash",
+            "command": "node -e 'let d=\"\";process.stdin.on(\"data\",c=>d+=c);process.stdin.on(\"end\",()=>{try{const j=JSON.parse(d);const fp=j.tool_input&&j.tool_input.file_path;if(!fp)return;const path=require(\"path\");const fs=require(\"fs\");let dir=path.dirname(path.resolve(fp));let root=null;while(true){if(fs.existsSync(path.join(dir,\"eslint.config.mjs\"))||fs.existsSync(path.join(dir,\"eslint.config.js\"))){root=dir;break;}const parent=path.dirname(dir);if(parent===dir)break;dir=parent;}if(!root)return;require(\"child_process\").spawnSync(\"npx\",[\"--yes\",\"eslint\",\"--fix\",path.resolve(fp)],{cwd:root,stdio:\"inherit\",shell:true});}catch(e){}})' 2>/dev/null || true",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}

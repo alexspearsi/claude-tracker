@@ -8,6 +8,7 @@ import { ApiError } from '@/shared/api/api-client';
 import { ROUTES } from '@/shared/config/routes';
 import { Logo } from '@/shared/ui/logo';
 import { MainNav } from '@/widgets/app-header/ui/main-nav';
+import { MobileNav } from '@/widgets/app-header/ui/mobile-nav';
 
 type DisplayNameResult = { status: 'ok'; name: string } | { status: 'unauthorized' };
 
@@ -48,21 +49,22 @@ export async function AppHeader() {
 
   return (
     <header className="lg-glass-pill fixed top-6 right-8 left-8 z-40 flex h-[72px] items-center justify-between gap-4 rounded-full px-5 py-0 pl-5">
-      <div className="flex items-center gap-7">
+      <div className="flex min-w-0 items-center gap-7">
         <Link href={ROUTES.dashboard}>
           <Logo size="sm" />
         </Link>
-        <MainNav />
+        <MainNav className="hidden lg:flex" />
       </div>
-      <div className="flex items-center gap-3">
-        <div className="flex items-center gap-2.5 rounded-full border border-white/60 bg-white/35 py-1 pr-3.5 pl-1 dark:border-white/15 dark:bg-white/10">
-          <div className="flex size-8 items-center justify-center rounded-full bg-gradient-to-br from-[#a78bfa] to-[#60a5fa] text-[13px] font-extrabold text-white">
+      <div className="hidden items-center gap-3 lg:flex">
+        <div className="flex min-w-0 items-center gap-2.5 rounded-full border border-white/60 bg-white/35 py-1 pr-3.5 pl-1 dark:border-white/15 dark:bg-white/10">
+          <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#a78bfa] to-[#60a5fa] text-[13px] font-extrabold text-white">
             {initial}
           </div>
-          <span className="text-sm font-semibold">{result.name}</span>
+          <span className="max-w-[160px] truncate text-sm font-semibold">{result.name}</span>
         </div>
         <LogoutButton />
       </div>
+      <MobileNav userName={result.name} logoutButton={<LogoutButton />} />
     </header>
   );
 }

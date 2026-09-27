@@ -9,7 +9,6 @@ import { apiFetch } from '@/shared/api/api-client';
  * в рамках одного запроса proxy.ts уже обновил куку до рендера, поэтому все места
  * получают один и тот же токен и дедупликация срабатывает.
  */
-export const getCurrentUser = cache(
-  (accessToken: string): Promise<UserProfile> =>
-    apiFetch<UserProfile>('/users/me', { accessToken, cache: 'no-store' }),
+export const getCurrentUser = cache((accessToken: string): Promise<UserProfile> =>
+  apiFetch<UserProfile>('/users/me', { accessToken, cache: 'no-store' }),
 );

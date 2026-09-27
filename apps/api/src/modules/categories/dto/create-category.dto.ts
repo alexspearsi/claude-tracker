@@ -8,6 +8,11 @@ import {
   trim,
 } from './category-validation.js';
 
+/**
+ * Тело `POST /categories`. Проверяется глобальным `ValidationPipe` (`whitelist` +
+ * `forbidNonWhitelisted`) — импортировать значением, не `import type`, иначе метатип
+ * параметра станет `Object` и проверка молча пропустится.
+ */
 export class CreateCategoryDto {
   @Transform(trim)
   @IsString({ message: messages.nameString })

@@ -31,7 +31,11 @@ export async function apiFetch<T>(path: string, options: RequestOptions = {}): P
   const body: unknown = response.status === 204 ? null : await response.json();
 
   if (!response.ok) {
-    throw new ApiError(`Запрос ${path} завершился ошибкой ${response.status}`, response.status, body);
+    throw new ApiError(
+      `Запрос ${path} завершился ошибкой ${response.status}`,
+      response.status,
+      body,
+    );
   }
 
   return body as T;

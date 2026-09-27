@@ -26,7 +26,12 @@ function SummaryStat({ label, amount, colorClassName, iconBg, icon }: SummarySta
             {icon}
           </div>
         </div>
-        <span className={cn('text-[34px] leading-none font-extrabold tracking-tight tabular-nums', colorClassName)}>
+        <span
+          className={cn(
+            'text-[34px] leading-none font-extrabold tracking-tight tabular-nums',
+            colorClassName,
+          )}
+        >
           {formatMoney(amount)}
         </span>
       </CardContent>
@@ -43,13 +48,23 @@ interface MonthlySummaryProps {
  *  в сетке рядом со списком транзакций), а не одна общая Card: 1:1 с макетом. */
 export function SummaryStats({ summary }: MonthlySummaryProps) {
   return (
-    <div className="flex gap-5">
+    <div className="flex flex-col gap-5 sm:flex-row">
       <SummaryStat
         label="Баланс"
         amount={summary.balance}
         iconBg="rgba(120,40,200,.12)"
         icon={
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--lg-accent)" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="var(--lg-accent)"
+            strokeWidth="2.4"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
             <path d="M12 3v18" />
             <path d="M5 7h14" />
             <path d="m5 7-3 7a3 3 0 0 0 6 0Z" />
@@ -63,7 +78,17 @@ export function SummaryStats({ summary }: MonthlySummaryProps) {
         colorClassName="text-[var(--income)]"
         iconBg="rgba(18,161,80,.12)"
         icon={
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--income)" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="var(--income)"
+            strokeWidth="2.4"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
             <path d="M7 17 17 7" />
             <path d="M8 7h9v9" />
           </svg>
@@ -75,7 +100,17 @@ export function SummaryStats({ summary }: MonthlySummaryProps) {
         colorClassName="text-[var(--expense)]"
         iconBg="rgba(194,14,77,.12)"
         icon={
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--expense)" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="var(--expense)"
+            strokeWidth="2.4"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
             <path d="M7 7l10 10" />
             <path d="M17 8v9H8" />
           </svg>

@@ -20,6 +20,11 @@ function hashToken(token: string): string {
   return createHash('sha256').update(token).digest('hex');
 }
 
+/**
+ * Выпуск, проверка и отзыв пары access/refresh JWT-токенов. Refresh-токены хранятся в БД
+ * только в виде SHA-256-хеша (см. {@link hashToken}), что позволяет отзывать их по записи
+ * и не даёт восстановить исходный токен при утечке базы.
+ */
 @Injectable()
 export class TokensService {
   constructor(
@@ -28,15 +33,16 @@ export class TokensService {
     private readonly config: ConfigService,
   ) {}
 
-  /** Выпускает пару access + refresh и сохраняет хеш refresh-токена в БД. */
+  /**
+   * Выпускает пару access + refresh и сохраняет хеш refresh-токена в БД.
+   * @param userId id пользователя, для которого выпускаются токены
+   * @param email email пользователя — кладётся в payload обоих токенов
+   */
   async issue(userId: string, email: string): Promise<AuthTokens> {
-    const accessToken = await this.jwt.signAsync(
-      { sub: userId, email } satisfies JwtPayload,
-      {
-        secret: this.config.getOrThrow<string>('JWT_ACCESS_SECRET'),
-        expiresIn: this.config.getOrThrow<string>('JWT_ACCESS_TTL') as JwtSignOptions['expiresIn'],
-      },
-    );
+    const accessToken = await this.jwt.signAsync({ sub: userId, email } satisfies JwtPayload, {
+      secret: this.config.getOrThrow<string>('JWT_ACCESS_SECRET'),
+      expiresIn: this.config.getOrThrow<string>('JWT_ACCESS_TTL') as JwtSignOptions['expiresIn'],
+    });
 
     const jti = randomUUID();
     const refreshTtl = this.config.getOrThrow<string>('JWT_REFRESH_TTL');
@@ -63,6 +69,8 @@ export class TokensService {
   /**
    * Проверяет подпись refresh-токена и находит соответствующую неотозванную,
    * непросроченную запись в БД по хешу.
+   * @throws UnauthorizedException если подпись неверна, срок истёк, токен отозван
+   *   или запись не найдена
    */
   async verify(refreshToken: string): Promise<{ userId: string; email: string; recordId: string }> {
     let payload: RefreshPayload;
@@ -90,7 +98,10 @@ export class TokensService {
     return { userId: payload.sub, email: payload.email, recordId: record.id };
   }
 
-  /** Отзывает refresh-токен по его id записи. */
+  /**
+   * Отзывает refresh-токен по его id записи.
+   * @param recordId id записи `RefreshToken`, полученный из {@link verify}
+   */
   async revokeById(recordId: string): Promise<void> {
     await this.prisma.refreshToken.update({
       where: { id: recordId },

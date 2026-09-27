@@ -6,6 +6,11 @@ import { GetUserByIdHandler } from './queries/get-user-by-id.handler.js';
 import { UsersController } from './users.controller.js';
 import { UsersService } from './users.service.js';
 
+/**
+ * Модуль пользователей: CRUD через `UsersService`, доступ снаружи — только через CQRS-контракты
+ * из `contracts/users` (`CreateUserCommand`, `GetUserByEmailQuery`, `GetUserByIdQuery`),
+ * которыми пользуется `AuthModule`. Ничего не экспортирует напрямую — `UsersService` инкапсулирован.
+ */
 @Module({
   imports: [CqrsModule],
   controllers: [UsersController],
