@@ -33,7 +33,7 @@ export function MobileNav({ userName, logoutButton }: MobileNavProps) {
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="md:hidden" aria-label="Открыть меню">
+        <Button variant="ghost" size="icon" className="lg:hidden" aria-label="Открыть меню">
           <Menu />
         </Button>
       </SheetTrigger>

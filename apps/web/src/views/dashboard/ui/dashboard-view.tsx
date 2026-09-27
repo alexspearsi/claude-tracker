@@ -45,12 +45,14 @@ export async function DashboardView({ page }: DashboardViewProps) {
       </div>
 
       {summaryResult.status === 'error' ? (
-        <p className="text-sm text-destructive">Не удалось загрузить сводку: {summaryResult.message}</p>
+        <p className="text-sm text-destructive">
+          Не удалось загрузить сводку: {summaryResult.message}
+        </p>
       ) : (
         <SummaryStats summary={summaryResult.summary} />
       )}
 
-      <div className="grid grid-cols-[minmax(0,2fr)_minmax(0,1fr)] items-start gap-5">
+      <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
         {result.status === 'error' ? (
           <p className="text-sm text-destructive">Не удалось загрузить данные: {result.message}</p>
         ) : (
