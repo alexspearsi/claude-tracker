@@ -17,6 +17,17 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+  dbhub:
+    image: bytebase/dbhub:latest
+    ports:
+      - '8090:8090'
+    command:
+      - '--transport=http'
+      - '--port=8090'
+      - '--dsn=postgresql://${POSTGRES_USER:-expense}:${POSTGRES_PASSWORD:-expense}@db:5432/${POSTGRES_DB:-expense_tracker}?sslmode=disable'
+    depends_on:
+      db:
+        condition: service_healthy
 
 volumes:
   db-data:
