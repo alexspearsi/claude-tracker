@@ -8,7 +8,10 @@ import { apiErrorMessage, extractFieldErrors } from '@/shared/api/error-message'
 import { CATEGORY_AFFECTED_PATHS } from '@/features/category-form/model/affected-paths';
 import type { CategoryActionState } from '@/features/category-form/model/types';
 
-export async function updateCategoryAction(id: string, input: unknown): Promise<CategoryActionState> {
+export async function updateCategoryAction(
+  id: string,
+  input: unknown,
+): Promise<CategoryActionState> {
   // Server Action доступен прямым POST, поэтому валидация клиента здесь не защита (T-01-08).
   const parsed = updateCategorySchema.safeParse(input);
   if (!parsed.success) {

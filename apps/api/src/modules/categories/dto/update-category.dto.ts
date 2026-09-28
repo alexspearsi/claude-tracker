@@ -14,6 +14,11 @@ import {
  */
 const isPresent = (_dto: object, value: unknown): boolean => value !== undefined;
 
+/**
+ * Тело `PATCH /categories/:id` — все поля опциональны (частичное обновление).
+ * Проверяется глобальным `ValidationPipe`; импортировать значением, не `import type`
+ * (см. `CreateCategoryDto`).
+ */
 export class UpdateCategoryDto {
   @ValidateIf(isPresent)
   @Transform(trim)

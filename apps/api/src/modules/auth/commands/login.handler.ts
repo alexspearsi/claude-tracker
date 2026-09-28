@@ -11,6 +11,7 @@ import { LoginCommand } from './login.command.js';
 
 const INVALID_CREDENTIALS = 'Неверный email или пароль';
 
+/** Обрабатывает {@link LoginCommand}: сверяет пароль и выдаёт пару токенов. */
 @CommandHandler(LoginCommand)
 export class LoginHandler implements ICommandHandler<LoginCommand> {
   constructor(
@@ -18,6 +19,7 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
     private readonly tokens: TokensService,
   ) {}
 
+  /** @throws UnauthorizedException если пользователь не найден или пароль не совпадает */
   async execute(command: LoginCommand): Promise<AuthTokens> {
     const user = await this.queryBus.execute<GetUserByEmailQuery, UserCredentials | null>(
       new GetUserByEmailQuery(command.email),

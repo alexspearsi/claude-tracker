@@ -8,6 +8,7 @@ import { isPrismaError, PrismaErrorCode } from '../../prisma/prisma-errors.js';
 import type { CreateCategoryDto } from './dto/create-category.dto.js';
 import type { UpdateCategoryDto } from './dto/update-category.dto.js';
 
+/** Форма строки `Category` в Prisma — до сериализации `createdAt` в ISO-строку. */
 interface CategoryRecord {
   id: string;
   name: string;
@@ -16,6 +17,10 @@ interface CategoryRecord {
   createdAt: Date;
 }
 
+/**
+ * CRUD категорий с изоляцией по пользователю: все методы фильтруют по `userId`, поэтому
+ * категория одного пользователя не видна и не доступна для изменения другому.
+ */
 @Injectable()
 export class CategoriesService {
   constructor(
@@ -23,7 +28,7 @@ export class CategoriesService {
     private readonly queryBus: QueryBus,
   ) {}
 
-  // Все методы фильтруют по userId: категории одного пользователя не видны другому.
+  /** Возвращает все категории пользователя, отсортированные по имени. */
   async findAll(userId: string): Promise<Category[]> {
     const records = await this.prisma.category.findMany({
       where: { userId },
@@ -32,6 +37,12 @@ export class CategoriesService {
     return records.map(toCategory);
   }
 
+  /**
+   * Создаёт категорию, предварительно убедившись через `UsersModule` (по шине CQRS), что
+   * пользователь из access-токена ещё существует — токен мог пережить удаление аккаунта.
+   * @throws NotFoundException если пользователь уже удалён
+   * @throws ConflictException если у пользователя уже есть категория с таким названием
+   */
   async create(userId: string, dto: CreateCategoryDto): Promise<Category> {
     // Токен мог пережить удаление пользователя — сверяемся с модулем users через шину
     const user = await this.queryBus.execute<GetUserByIdQuery, UserRecord | null>(
@@ -51,6 +62,11 @@ export class CategoriesService {
     }
   }
 
+  /**
+   * Обновляет категорию пользователя.
+   * @throws NotFoundException если категории с таким id нет у этого пользователя
+   * @throws ConflictException при конфликте уникального названия
+   */
   async update(userId: string, id: string, dto: UpdateCategoryDto): Promise<Category> {
     try {
       const record = await this.prisma.category.update({
@@ -63,6 +79,11 @@ export class CategoriesService {
     }
   }
 
+  /**
+   * Удаляет категорию пользователя.
+   * @throws NotFoundException если категории с таким id нет у этого пользователя
+   * @throws ConflictException если по категории есть транзакции (`onDelete: Restrict`)
+   */
   async remove(userId: string, id: string): Promise<void> {
     try {
       await this.prisma.category.delete({ where: { id, userId } });
@@ -72,6 +93,7 @@ export class CategoriesService {
   }
 }
 
+/** Приводит запись Prisma к контракту `Category` — сериализует `createdAt` в ISO-строку. */
 function toCategory(record: CategoryRecord): Category {
   return {
     id: record.id,
@@ -82,6 +104,7 @@ function toCategory(record: CategoryRecord): Category {
   };
 }
 
+/** Переводит известные ошибки Prisma (unique/not found/FK) в HTTP-исключения Nest. */
 function toHttpError(error: unknown): unknown {
   if (isPrismaError(error, PrismaErrorCode.UniqueViolation)) {
     return new ConflictException('Категория с таким названием уже есть');

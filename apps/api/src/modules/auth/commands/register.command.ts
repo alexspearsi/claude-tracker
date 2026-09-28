@@ -1,3 +1,4 @@
+/** Команда регистрации нового пользователя — обрабатывается {@link RegisterHandler}. */
 export class RegisterCommand {
   constructor(
     public readonly email: string,

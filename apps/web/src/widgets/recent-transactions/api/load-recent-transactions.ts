@@ -35,7 +35,10 @@ export async function loadRecentTransactions(
 
   // 401 от любого из двух запросов означает мёртвую сессию — источник не важен.
   const isUnauthorized = [txResult, catResult].some(
-    (result) => result.status === 'rejected' && result.reason instanceof ApiError && result.reason.status === 401,
+    (result) =>
+      result.status === 'rejected' &&
+      result.reason instanceof ApiError &&
+      result.reason.status === 401,
   );
   if (isUnauthorized) {
     return { status: 'unauthorized' };
