@@ -1,0 +1,28 @@
+{
+  "contract": "1.0.0",
+  "flavor": "core",
+  "milestone": null,
+  "phases": [
+    {
+      "number": "1",
+      "name": "Категории",
+      "status": "complete"
+    },
+    {
+      "number": "2",
+      "name": "Транзакции",
+      "status": "pending"
+    },
+    {
+      "number": "3",
+      "name": "Сводка и баланс",
+      "status": "pending"
+    }
+  ],
+  "next": {
+    "command": "/gsd:progress --next",
+    "label": "Advance to the next step",
+    "reason": "Phase 2 of 3 · 33% · executing"
+  },
+  "updated_at": "2026-09-21T14:06:33.279Z"
+}

@@ -30,3 +30,6 @@ Thumbs.db
 
 # test / coverage
 coverage/
+
+# посторонний вложенный git-репозиторий
+ai-agent-check/
